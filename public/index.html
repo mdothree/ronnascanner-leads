@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RonnaScanner Leads — Business Lead Scanner</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/styles.css" />
+  <!-- SEO & Social -->
+  <meta name="description" content="Find qualified B2B leads by industry, location, company size, and technology stack. Export verified contact data." />
+  <meta name="robots" content="index, follow" />
+  <link rel="canonical" href="https://ronnascanner.com/leads" />
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://ronnascanner.com/leads" />
+  <meta property="og:title" content="RonnaScanner — Business Lead Scanner" />
+  <meta property="og:description" content="Find qualified B2B leads by industry, location, company size, and technology stack. Export verified contact data." />
+  <meta property="og:image" content="https://ronnascanner.com/og-image.png" />
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="RonnaScanner — Business Lead Scanner" />
+  <meta name="twitter:description" content="Find qualified B2B leads by industry, location, company size, and technology stack. Export verified contact data." />
+  <meta name="twitter:image" content="https://ronnascanner.com/og-image.png" />
+
+  <!-- Theme color -->
+  <link rel="manifest" href="/manifest.json" />
+  <meta name="theme-color" content="#F97316" />
+</head>
+<body>
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+  
+  <!-- NAV -->
+  <nav class="nav" aria-label="Main navigation">
+    <a href="/" class="nav-brand">ronna<span>.</span>scanner</a>
+    <div class="nav-links">
+      <span class="plan-badge hidden" id="plan-badge"></span>
+      <a href="#" id="nav-login" class="nav-link">Sign In</a>
+      <button class="btn-upgrade-nav hidden" id="nav-upgrade">⚡ Upgrade</button>
+      <button class="btn-icon hidden" id="nav-manage">Manage Plan</button>
+      <a href="#" id="nav-signup" class="btn-nav">Free Trial</a>
+    </div>
+  </nav>
+
+  <!-- AUTH MODAL -->
+  <div class="modal-overlay hidden" id="auth-modal" role="dialog" aria-modal="true" aria-labelledby="auth-modal-title">
+    <div class="modal">
+      <button class="modal-close" id="modal-close" aria-label="Close dialog">&times;</button>
+      <div class="modal-tabs">
+        <button class="tab-btn active" data-tab="login">Sign In</button>
+        <button class="tab-btn" data-tab="signup">Sign Up</button>
+      </div>
+      <div class="tab-content" id="tab-login">
+        <input type="email" class="input" id="login-email" placeholder="Email" autocomplete="email" />
+        <input type="password" class="input" id="login-password" placeholder="Password" autocomplete="current-password" />
+        <button class="btn-primary full" id="btn-login" aria-label="Sign in to your account">Sign In</button>
+      </div>
+      <div class="tab-content hidden" id="tab-signup">
+        <input type="text" class="input" id="signup-name" placeholder="Full Name" autocomplete="name" />
+        <input type="email" class="input" id="signup-email" placeholder="Email" autocomplete="email" />
+        <input type="password" class="input" id="signup-password" placeholder="Password" autocomplete="new-password" />
+        <button class="btn-primary full" id="btn-signup" aria-label="Create a new account">Start Free Trial</button>
+      </div>
+      <p class="auth-error hidden" id="auth-error"></p>
+    </div>
+  </div>
+
+  <!-- HERO -->
+  <section class="hero" id="main-content">
+    <div class="hero-badge">AI-Powered Lead Scanner</div>
+    <h1 class="hero-title">Find <em>Qualified Leads</em><br />In Seconds</h1>
+    <p class="hero-sub">Scan any industry, location, or niche for verified business leads. Pull contact info, revenue data, and decision makers automatically.</p>
+  </section>
+
+  <!-- TOOL -->
+  <section class="tool-section" aria-label="Main tool" id="tool">
+    <div id="usage-meter-container"></div>
+    <div class="tool-container">
+
+      <!-- Search Panel -->
+      <div class="tool-panel">
+        <div class="panel-header">
+          <span class="panel-num">01</span>
+          <h2>Define Your Target</h2>
+        </div>
+        <div class="two-col">
+          <div>
+            <label class="field-label" for="industry">Industry</label>
+            <input type="text" class="input" id="industry" placeholder="e.g. SaaS, Restaurant, Law Firm" />
+          </div>
+          <div>
+            <label class="field-label" for="location">Location</label>
+            <input type="text" class="input" id="location" placeholder="e.g. Miami, FL or United States" />
+          </div>
+        </div>
+        <div class="two-col">
+          <div>
+            <label class="field-label" for="company-size">Company Size</label>
+            <select class="input" id="company-size">
+              <option value="">Any Size</option>
+              <option value="1-10">1–10 employees</option>
+              <option value="11-50">11–50 employees</option>
+              <option value="51-200">51–200 employees</option>
+              <option value="201-500">201–500 employees</option>
+              <option value="500+">500+ employees</option>
+            </select>
+          </div>
+          <div>
+            <label class="field-label" for="revenue-range">Revenue Range</label>
+            <select class="input" id="revenue-range">
+              <option value="">Any Revenue</option>
+              <option value="0-1M">Under $1M</option>
+              <option value="1M-10M">$1M – $10M</option>
+              <option value="10M-50M">$10M – $50M</option>
+              <option value="50M+">$50M+</option>
+            </select>
+          </div>
+        </div>
+        <div>
+          <label class="field-label" for="keywords">Keywords / Tech Stack</label>
+          <input type="text" class="input" id="keywords" placeholder="e.g. Shopify, HubSpot, needs SEO" />
+        </div>
+        <div>
+          <label class="field-label" for="lead-count">Results per Scan</label>
+          <select class="input" id="lead-count">
+            <option value="10">10 leads (Free)</option>
+            <option value="50">50 leads (Pro)</option>
+            <option value="100">100 leads (Pro)</option>
+            <option value="500">500 leads (Team)</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Action Bar -->
+      <div class="tool-actions">
+        <button class="btn-primary large" id="btn-scan">
+          <span class="btn-text">🔍 Scan for Leads</span>
+          <span class="btn-loader hidden">Scanning...</span>
+        </button>
+      </div>
+
+      <!-- Scan Progress -->
+      <div class="scan-progress hidden" id="scan-progress">
+        <div class="scan-header">
+          <h3>Scanning in progress...</h3>
+          <span class="scan-pct" id="scan-pct">0%</span>
+        </div>
+        <div class="scan-bar">
+          <div class="scan-fill" id="scan-fill"></div>
+        </div>
+        <div class="scan-log" id="scan-log"></div>
+      </div>
+
+      <!-- Results -->
+      <div class="hidden" id="results-section">
+        <div class="export-bar">
+          <div class="export-bar-left">
+            Found <strong id="result-count">0</strong> leads matching your criteria
+          </div>
+          <div class="export-actions">
+            <button class="btn-icon" id="btn-export-csv">⬇️ Export CSV</button>
+            <button class="btn-icon" id="btn-export-json">⬇️ Export JSON</button>
+            <button class="btn-icon" id="btn-save-list">💾 Save List</button>
+          </div>
+        </div>
+
+        <div class="tool-panel">
+          <div class="table-wrap">
+            <table class="results-table" id="results-table">
+              <thead>
+                <tr>
+                  <th><input type="checkbox" id="select-all" /></th>
+                  <th>Company</th>
+                  <th>Industry</th>
+                  <th>Location</th>
+                  <th>Size</th>
+                  <th>Contact</th>
+                  <th>Score</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="results-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Saved Lists -->
+      <div class="hidden" id="saved-lists-section">
+        <div class="panel-header">
+          <span class="panel-num">02</span>
+          <h2>Saved Lead Lists</h2>
+        </div>
+        <div class="saved-lists-grid" id="saved-lists-grid"></div>
+      </div>
+
+    </div>
+  </section>
+
+  <footer class="footer">
+    <p>© 2025 ronnascanner.com — Powered by Apollo, Hunter &amp; Clearbit</p>
+  </footer>
+
+  <script type="module" src="js/app.js"></script>
+
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js').catch(() => {});
+      });
+    }
+  </script>
+</body>
+</html>
