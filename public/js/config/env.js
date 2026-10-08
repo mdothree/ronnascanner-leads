@@ -5,7 +5,7 @@
  * All app.js files import API_URL and STRIPE_KEY from here — never hardcoded.
  */
 
-const meta = (typeof import !== "undefined" && import.meta?.env) || {};
+const meta = (import.meta && import.meta.env) || {};
 const win  = (typeof window !== "undefined" && window.__ENV__) || {};
 
 // ─── Helper ───────────────────────────────────────────────────────────────────
