@@ -3,6 +3,7 @@ import { saveDoc, getUserDocs, tsToString } from "./services/firestoreService.js
 import { apiFetch } from "./config/env.js";
 import { toast } from "./utils/toast.js";
 import { initPaywall, gate, showPricingModal, renderUsageMeter } from "./services/paywallUI.js";
+import { showSkeleton } from "./utils/helpers.js";
 
 // ─── State ────────────────────────────────────────────────────────────────────
 let currentUser = null;
@@ -104,12 +105,11 @@ async function runScan() {
   ]);
 
   // Show skeleton table while scanning
-  document.getElementById("results-panel").classList.remove("hidden");
-  showSkeleton("leads-tbody", 8, "row");
+  document.getElementById("results-section").classList.remove("hidden");
+  showSkeleton("results-tbody", 8, "row");
   try {
-    const res = await apiFetch("/api/leads/scan", { industry, location, companySize, revenue, keywords, count });
-    const data = await res.json();
-    currentResults = data.leads || null;
+    const data = await apiFetch("/api/leads/scan", { industry, location, companySize, revenue, keywords, count });
+    currentResults = data?.leads || null;
   } catch {
     currentResults = null;
   }
@@ -271,10 +271,14 @@ async function loadSavedLists() {
 
 // RONNA-MOCK-FALLBACK: never fabricate results when the scanner API is unavailable.
 function showUnavailable() {
-  const panel = document.getElementById("results-panel") || document.getElementById("results-section");
-  if (panel) {
-    panel.classList.remove("hidden");
-    panel.innerHTML = '<div class="empty-state" role="status"><p><strong>The scanner service is unavailable right now.</strong></p><p>No results were generated. Please try again later.</p></div>';
+  // Keep the results table in the DOM so a later successful scan can render into it.
+  currentResults = [];
+  document.getElementById("results-section")?.classList.remove("hidden");
+  const count = document.getElementById("result-count");
+  if (count) count.textContent = "0";
+  const tbody = document.getElementById("results-tbody");
+  if (tbody) {
+    tbody.innerHTML = '<tr><td colspan="8"><div class="empty-state" role="status"><p><strong>The scanner service is unavailable right now.</strong></p><p>No results were generated. Please try again later.</p></div></td></tr>';
   }
   toast.error("Scanner service unavailable. No results were generated.");
 }

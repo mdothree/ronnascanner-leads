@@ -67,5 +67,6 @@ export async function apiFetch(path, body, options = {}) {
     const err = await res.json().catch(() => ({ error: `HTTP ${res.status}` }));
     throw new Error(err.error || `Request failed: ${res.status}`);
   }
+  // Returns the parsed JSON body. Callers must NOT call .json() again.
   return res.json();
 }
