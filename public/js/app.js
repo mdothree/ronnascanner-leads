@@ -96,11 +96,9 @@ async function runScan() {
   document.getElementById("results-section").classList.add("hidden");
 
   await animateScan([
-    `Connecting to Apollo.io database...`,
+    `Searching...`,
     `Searching ${industry} companies in ${location || "all locations"}...`,
     `Applying filters: size=${companySize || "any"}, revenue=${revenue || "any"}...`,
-    `Pulling contact data from Hunter.io...`,
-    `Enriching records via Clearbit...`,
     `Scoring leads by match quality...`,
     `Finalizing ${count} results...`
   ]);
@@ -111,12 +109,12 @@ async function runScan() {
   try {
     const res = await apiFetch("/api/leads/scan", { industry, location, companySize, revenue, keywords, count });
     const data = await res.json();
-    currentResults = data.leads || generateMockLeads(industry, location, count);
+    currentResults = data.leads || null;
   } catch {
-    currentResults = generateMockLeads(industry, location, count);
+    currentResults = null;
   }
 
-  renderResults(currentResults);
+  if (currentResults) renderResults(currentResults); else showUnavailable();
   renderUsageMeter("usage-meter-container", "scans");
   document.getElementById("scan-progress").classList.add("hidden");
   document.querySelector(".btn-text").classList.remove("hidden");
@@ -271,24 +269,12 @@ async function loadSavedLists() {
   });
 }
 
-// ─── Mock data (fallback when API is not yet connected) ───────────────────────
-function generateMockLeads(industry, location, count) {
-  const companies = ["Apex Solutions", "BlueRidge Tech", "Coastal Media", "Dune Analytics", "Ember Creative",
-    "Fortress Digital", "Glide Software", "Harbor Health", "Ionic Systems", "Jade Consulting",
-    "Kinetic Labs", "Lunar Media", "Marble Group", "Nexus Partners", "Orbit Ventures"];
-  const titles = ["CEO", "Founder", "VP Sales", "Director of Marketing", "COO", "Head of Growth", "CTO"];
-  const firstNames = ["James", "Sarah", "Michael", "Emily", "David", "Jessica", "Robert", "Ashley"];
-  const lastNames  = ["Smith", "Johnson", "Williams", "Brown", "Jones", "Garcia", "Miller", "Davis"];
-  const sizes = ["1–10", "11–50", "51–200", "201–500"];
-
-  return Array.from({ length: Math.min(count, companies.length) }, (_, i) => ({
-    company:      companies[i],
-    industry,
-    location:     location || "United States",
-    size:         sizes[i % sizes.length],
-    website:      companies[i].toLowerCase().replace(/ /g, "") + ".com",
-    contactName:  `${firstNames[i % firstNames.length]} ${lastNames[i % lastNames.length]}`,
-    contactTitle: titles[i % titles.length],
-    score:        Math.floor(Math.random() * 35) + 65
-  }));
+// RONNA-MOCK-FALLBACK: never fabricate results when the scanner API is unavailable.
+function showUnavailable() {
+  const panel = document.getElementById("results-panel") || document.getElementById("results-section");
+  if (panel) {
+    panel.classList.remove("hidden");
+    panel.innerHTML = '<div class="empty-state" role="status"><p><strong>The scanner service is unavailable right now.</strong></p><p>No results were generated. Please try again later.</p></div>';
+  }
+  toast.error("Scanner service unavailable. No results were generated.");
 }
