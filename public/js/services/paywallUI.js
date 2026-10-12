@@ -114,7 +114,10 @@ async function startEmbeddedCheckout(priceId, planKey) {
     // Store reference for cleanup
     window._stripeCheckout = checkout;
   } catch (e) {
-    container.innerHTML = `<p style="color:#EF4444;padding:1rem">Checkout failed: ${e.message}</p>`;
+    const err = document.createElement("p");
+    err.style.cssText = "color:#EF4444;padding:1rem";
+    err.textContent = `Checkout failed: ${e.message}`;
+    container.replaceChildren(err);
   }
 }
 
