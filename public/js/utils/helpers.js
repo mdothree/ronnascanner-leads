@@ -20,12 +20,22 @@ export function slugify(str) {
   return str.toLowerCase().trim().replace(/[^\w\s-]/g, "").replace(/[\s_-]+/g, "-");
 }
 
+// RONNA-XSS-ESCAPE: also escapes ' and maps null/undefined to "".
 export function escapeHtml(str) {
-  return String(str)
+  return String(str ?? "")
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+// RONNA-XSS-ESCAPE: only allow http(s)/mailto URLs from data into href; returns "" otherwise.
+export function safeUrl(url, { assumeHttps = false } = {}) {
+  let s = String(url ?? "").trim();
+  if (!s) return "";
+  if (assumeHttps && !/^[a-z][a-z0-9+.-]*:/i.test(s)) s = "https://" + s.replace(/^\/+/, "");
+  return /^(https?:|mailto:)/i.test(s) ? s : "";
 }
 
 export function capitalize(str) {

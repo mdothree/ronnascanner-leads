@@ -3,7 +3,7 @@ import { saveDoc, getUserDocs, getDoc_, tsToString } from "./services/firestoreS
 import { apiFetch } from "./config/env.js";
 import { toast } from "./utils/toast.js";
 import { initPaywall, gate, showPricingModal, renderUsageMeter } from "./services/paywallUI.js";
-import { showSkeleton } from "./utils/helpers.js";
+import { showSkeleton, escapeHtml } from "./utils/helpers.js";
 
 // ─── State ────────────────────────────────────────────────────────────────────
 let currentUser = null;
@@ -152,18 +152,18 @@ function renderResults(leads) {
     <tr>
       <td><input type="checkbox" class="row-check" data-i="${i}" /></td>
       <td>
-        <strong>${l.company}</strong><br />
-        <span class="tag tag-gray">${l.website || ""}</span>
+        <strong>${escapeHtml(l.company)}</strong><br />
+        <span class="tag tag-gray">${escapeHtml(l.website)}</span>
       </td>
-      <td>${l.industry}</td>
-      <td>${l.location}</td>
-      <td>${l.size || "—"}</td>
+      <td>${escapeHtml(l.industry)}</td>
+      <td>${escapeHtml(l.location)}</td>
+      <td>${escapeHtml(l.size || "—")}</td>
       <td>
-        ${l.contactName ? `<strong>${l.contactName}</strong><br /><small>${l.contactTitle || ""}</small>` : "—"}
+        ${l.contactName ? `<strong>${escapeHtml(l.contactName)}</strong><br /><small>${escapeHtml(l.contactTitle)}</small>` : "—"}
       </td>
       <td>
         <span class="tag ${l.score >= 80 ? "tag-green" : l.score >= 60 ? "tag-orange" : "tag-gray"}">
-          ${l.score}
+          ${escapeHtml(l.score)}
         </span>
       </td>
       <td>
@@ -246,12 +246,12 @@ async function loadSavedLists() {
   grid.innerHTML = lists.map(data => {
     const d = data;
     return `
-      <div class="result-card saved-list-card" data-id="${d.id}">
-        <div class="result-count">${data.count}</div>
-        <strong>${data.name}</strong>
-        <p>${data.query?.industry || ""} · ${data.query?.location || "All locations"}</p>
-        <small>${data.createdAt?.toDate?.().toLocaleDateString?.() || "Recently"}</small>
-        <button class="btn-primary load-list-btn" data-id="${d.id}">Load List</button>
+      <div class="result-card saved-list-card" data-id="${escapeHtml(d.id)}">
+        <div class="result-count">${escapeHtml(data.count)}</div>
+        <strong>${escapeHtml(data.name)}</strong>
+        <p>${escapeHtml(data.query?.industry)} · ${escapeHtml(data.query?.location || "All locations")}</p>
+        <small>${escapeHtml(data.createdAt?.toDate?.().toLocaleDateString?.() || "Recently")}</small>
+        <button class="btn-primary load-list-btn" data-id="${escapeHtml(d.id)}">Load List</button>
       </div>`;
   }).join("");
 
