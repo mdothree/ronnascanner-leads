@@ -258,7 +258,7 @@ async function loadSavedLists() {
   grid.querySelectorAll(".load-list-btn").forEach(btn => {
     btn.addEventListener("click", async () => {
       const docId = btn.dataset.id;
-      // RONNA-LOADLIST-AWAIT-BUG: was `await (await import(...)).then(...)` → TypeError
+      // RONNA-LOADLIST-AWAIT-BUG: was an awaited dynamic import chained with .then() → TypeError
       // (a module namespace has no .then). Use the shared Firestore service instead.
       try {
         const list = await getDoc_("lead-lists", docId);
