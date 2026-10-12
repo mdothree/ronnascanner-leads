@@ -679,3 +679,18 @@ body { font-family: 'Syne', 'DM Sans', sans-serif; background: var(--off-white);
   --gray-700:    #D1D5DB;
   --text:        #F9FAFB;
 }
+
+/* ── cycle-8 P2/P3 (ronna subs) ───────────────────────────────────────────
+   A11Y-003: white text on #F97316 was 2.8:1 → #C2410C 5.18:1 (hover #9A3412 7.3:1).
+   Skip link white on #10B981 was 2.5:1 → #047857 5.48:1.
+   MOBILE-RONNASUB-HEADER-WRAP: header links never wrap; tighter at ≤400px. */
+.btn-nav, .btn-primary, .ronnascanner .upgrade-btn { background:#C2410C; }
+.btn-nav:hover, .btn-primary:hover { background:#9A3412; }
+.skip-link { background:#047857; }
+.nav-link, .btn-nav, .btn-upgrade-nav, .btn-icon { white-space:nowrap; }
+@media (max-width:400px) {
+  .nav { padding:.75rem .75rem; }
+  .nav-links { gap:.4rem; }
+  .nav-link { font-size:.8rem; padding:.4rem .4rem; }
+  .btn-nav { padding:.4rem .6rem; font-size:.75rem; }
+}

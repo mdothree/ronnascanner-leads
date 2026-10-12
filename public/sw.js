@@ -1,11 +1,12 @@
 "use strict";
 
-const CACHE_NAME = "ronnascanner-leads-v1";
+const CACHE_NAME = "ronnascanner-leads-v2";
 const STATIC_ASSETS = [
   "/",
   "/index.html",
   "/css/styles.css",
   "/js/app.js",
+  "/js/boot.js",
   "/js/config/firebase.js",
   "/js/config/env.js",
   "/js/services/authService.js",

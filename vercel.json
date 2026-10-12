@@ -56,6 +56,14 @@
       "dest": "/public/$1.jpg"
     },
     {
+      "src": "/robots.txt",
+      "dest": "/public/robots.txt"
+    },
+    {
+      "src": "/sitemap.xml",
+      "dest": "/public/sitemap.xml"
+    },
+    {
       "src": "/(.*)",
       "dest": "/public/404.html",
       "status": 404
