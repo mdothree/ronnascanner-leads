@@ -694,3 +694,11 @@ body { font-family: 'Syne', 'DM Sans', sans-serif; background: var(--off-white);
   .nav-link { font-size:.8rem; padding:.4rem .4rem; }
   .btn-nav { padding:.4rem .6rem; font-size:.75rem; }
 }
+
+/* A11Y-003 (color-contrast, light theme): panel numbers #FDDCB5 were 1.3:1 on white (large text needs 3:1);
+   footer text #94A3B8 was 2.5:1; "Soon" badge white on #D97706 was 3.2:1. */
+@media not all and (prefers-color-scheme: dark) {
+  .panel-num { color: #EA580C; }
+  .footer, .footer p { color: #64748B; }
+}
+.badge-soon { background: #B45309; }
