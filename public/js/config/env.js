@@ -70,3 +70,8 @@ export async function apiFetch(path, body, options = {}) {
   // Returns the parsed JSON body. Callers must NOT call .json() again.
   return res.json();
 }
+
+// ─── Checkout gate ────────────────────────────────────────────────────────────
+// Paid checkout stays closed until a real Stripe publishable key + price IDs are configured
+// and this is deliberately switched on (VITE_PRO_CHECKOUT_ENABLED / window.__ENV__). Fails closed.
+export const PRO_CHECKOUT_ENABLED = env("VITE_PRO_CHECKOUT_ENABLED", "false") === "true";

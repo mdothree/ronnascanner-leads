@@ -1,4 +1,4 @@
-import { STRIPE_KEY, STRIPE_PRO_PRICE_ID, STRIPE_TEAM_PRICE_ID } from "../config/env.js";
+import { STRIPE_KEY, STRIPE_PRO_PRICE_ID, STRIPE_TEAM_PRICE_ID, PRO_CHECKOUT_ENABLED } from "../config/env.js";
 
 /**
  * paymentService.js
@@ -21,26 +21,34 @@ export const PLANS = {
   },
   pro: {
     name: "Pro",
-    priceId: STRIPE_PRO_PRICE_ID || "__STRIPE_PRO_PRICE_ID__",
+    priceId: STRIPE_PRO_PRICE_ID || "",
     price: 9.99,
     limits: { analyses: Infinity, saves: Infinity },
     features: ["Unlimited uses", "Full results", "Save history", "Priority AI", "Export PDF"]
   },
   team: {
     name: "Team",
-    priceId: STRIPE_TEAM_PRICE_ID || "__STRIPE_TEAM_PRICE_ID__",
+    priceId: STRIPE_TEAM_PRICE_ID || "",
     price: 29.99,
     limits: { analyses: Infinity, saves: Infinity },
     features: ["Everything in Pro", "5 team members", "Team dashboard", "API access"]
   }
 };
 
+// ─── Checkout gate (fails closed) ────────────────────────────────────────────
+export const CHECKOUT_OPEN = PRO_CHECKOUT_ENABLED && !!STRIPE_KEY;
+const CHECKOUT_CLOSED_MSG = "Checkout is not open yet. No payment can be taken on this site right now.";
+function assertCheckoutOpen() {
+  if (!CHECKOUT_OPEN) throw new Error(CHECKOUT_CLOSED_MSG);
+}
+
 // ─── Stripe loader ────────────────────────────────────────────────────────────
 let _stripe = null;
 async function getStripe() {
+  assertCheckoutOpen();
   if (_stripe) return _stripe;
   await loadScript("https://js.stripe.com/v3/");
-  _stripe = Stripe(STRIPE_KEY || "__STRIPE_PUBLISHABLE_KEY__");
+  _stripe = Stripe(STRIPE_KEY);
   return _stripe;
 }
 
@@ -102,6 +110,7 @@ export async function checkLimit(userId, action, limit) {
 
 // ─── Stripe Checkout (server-side session) ────────────────────────────────────
 export async function createCheckoutSession(userId, priceId, successUrl, cancelUrl) {
+  assertCheckoutOpen();
   const res = await fetch("/api/payment/create-session", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -113,6 +122,7 @@ export async function createCheckoutSession(userId, priceId, successUrl, cancelU
 
 // ─── Stripe Embedded Checkout (Payment Element) ───────────────────────────────
 export async function mountEmbeddedCheckout(containerId, priceId, userId) {
+  assertCheckoutOpen();
   const stripe = await getStripe();
 
   // Get client secret from server
@@ -131,6 +141,7 @@ export async function mountEmbeddedCheckout(containerId, priceId, userId) {
 
 // ─── Customer portal ──────────────────────────────────────────────────────────
 export async function openCustomerPortal(userId) {
+  assertCheckoutOpen();
   const res = await fetch("/api/payment/portal", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
