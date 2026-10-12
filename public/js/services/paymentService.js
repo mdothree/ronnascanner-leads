@@ -14,7 +14,7 @@ import {
 // ─── Plan config (update keys per project) ──────────────────────────────────
 export const PLANS = {
   free: {
-    name: "Free",
+    name: "Basic",
     price: 0,
     limits: { analyses: 3, saves: 5 },
     features: ["3 uses per month", "Basic results", "No history"]

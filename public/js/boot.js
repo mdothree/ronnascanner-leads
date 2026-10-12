@@ -1,6 +1,6 @@
 /* boot.js — classic (non-module) script, CSP-safe (script-src 'self').
  * HEADERS-CSP (F3): service-worker registration moved here from an inline <script> the CSP blocked.
- * RONNA-SUB-SIGNIN-DEAD: header Sign In / Free Trial are real #signin / #signup links; this opens the
+ * RONNA-SUB-SIGNIN-DEAD: header Sign In / Sign Up are real #signin / #signup links; this opens the
  * auth modal on click or when the page is loaded with that hash, even if the Firebase-dependent
  * app module has not loaded. app.js keeps its own handlers (sign-out when signed in). */
 (function () {

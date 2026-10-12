@@ -68,7 +68,7 @@ export function showPricingModal(highlightPlan = "pro") {
             ${key === highlightPlan ? '<div class="popular-badge">Most Popular</div>' : ''}
             ${_subscription.plan === key ? '<div class="current-badge">Current Plan</div>' : ''}
             <div class="plan-name">${plan.name}</div>
-            <div class="plan-price">${plan.price === 0 ? 'Free' : `$${plan.price}<span>/mo</span>`}</div>
+            <div class="plan-price">${plan.price === 0 ? '$0<span>/mo</span>' : `$${plan.price}<span>/mo</span>`}</div>
             <ul class="plan-features">
               ${plan.features.map(f => `<li>✓ ${f}</li>`).join("")}
             </ul>
@@ -131,7 +131,7 @@ export function showUpgradePrompt(action, used, limit) {
     <div class="upgrade-content">
       <div class="upgrade-icon">🚀</div>
       <div class="upgrade-text">
-        <strong>You've used ${used} of ${limit} free ${action}s this month</strong>
+        <strong>You've used ${used} of ${limit} Basic-plan ${action}s this month</strong>
         <p>Upgrade to Pro for unlimited access — just $9.99/mo</p>
       </div>
       <button class="upgrade-cta" id="upgrade-cta-btn">Upgrade to Pro</button>
