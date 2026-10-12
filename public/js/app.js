@@ -1,5 +1,5 @@
 import { authService } from "./services/authService.js";
-import { saveDoc, getUserDocs, tsToString } from "./services/firestoreService.js";
+import { saveDoc, getUserDocs, getDoc_, tsToString } from "./services/firestoreService.js";
 import { apiFetch } from "./config/env.js";
 import { toast } from "./utils/toast.js";
 import { initPaywall, gate, showPricingModal, renderUsageMeter } from "./services/paywallUI.js";
@@ -212,16 +212,16 @@ document.getElementById("btn-save-list").addEventListener("click", async () => {
   if (!currentResults.length) return;
   
   const name = prompt("Name this list:", `${document.getElementById("industry").value} Leads`) || "My List";
-  await addDoc(collection(db, "lead-lists"), {
-    userId: currentUser.uid,
+  // RONNA-LOADLIST-AWAIT-BUG: addDoc/collection/db/serverTimestamp were never imported here
+  // (ReferenceError on Save List). saveDoc adds userId + createdAt/updatedAt itself.
+  await saveDoc("lead-lists", currentUser.uid, {
     name,
     count: currentResults.length,
     leads: currentResults.slice(0, 100),
     query: {
       industry: document.getElementById("industry").value,
       location: document.getElementById("location").value
-    },
-    createdAt: serverTimestamp()
+    }
   });
   loadSavedLists();
   toast.success("List saved!");
@@ -231,19 +231,20 @@ document.getElementById("btn-save-list").addEventListener("click", async () => {
 async function loadSavedLists() {
   if (!currentUser) return;
   
-  const q = query(
-    collection(db, "lead-lists"),
-    where("userId", "==", currentUser.uid),
-    orderBy("createdAt", "desc")
-  );
-  const snap = await getDocs(q);
+  // RONNA-LOADLIST-AWAIT-BUG: query/collection/where/orderBy/getDocs/db were never imported here.
+  let lists = [];
+  try {
+    lists = await getUserDocs("lead-lists", currentUser.uid);
+  } catch (e) {
+    console.warn("[leads] could not load saved lists", e);
+  }
   const grid = document.getElementById("saved-lists-grid");
-  if (snap.empty) {
+  if (!lists.length) {
     grid.innerHTML = "<p class='empty-state'>No saved lists yet. Run a scan and save your results.</p>";
     return;
   }
-  grid.innerHTML = snap.docs.map(d => {
-    const data = d.data();
+  grid.innerHTML = lists.map(data => {
+    const d = data;
     return `
       <div class="result-card saved-list-card" data-id="${d.id}">
         <div class="result-count">${data.count}</div>
@@ -257,13 +258,18 @@ async function loadSavedLists() {
   grid.querySelectorAll(".load-list-btn").forEach(btn => {
     btn.addEventListener("click", async () => {
       const docId = btn.dataset.id;
-      const docSnap = await (await import("./config/firebase.js")).then(async m => {
-        const { doc, getDoc } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
-        return getDoc(doc(m.db, "lead-lists", docId));
-      });
-      if (docSnap.exists()) {
-        currentResults = docSnap.data().leads || [];
-        renderResults(currentResults);
+      // RONNA-LOADLIST-AWAIT-BUG: was `await (await import(...)).then(...)` → TypeError
+      // (a module namespace has no .then). Use the shared Firestore service instead.
+      try {
+        const list = await getDoc_("lead-lists", docId);
+        if (list) {
+          currentResults = list.leads || [];
+          renderResults(currentResults);
+        } else {
+          toast.error("That list could not be found.");
+        }
+      } catch (e) {
+        toast.error("Could not load that list. Please try again.");
       }
     });
   });
