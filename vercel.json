@@ -1,82 +1,18 @@
 {
   "version": 2,
-  "builds": [
-    {
-      "src": "public/**",
-      "use": "@vercel/static"
-    },
-    {
-      "src": "api/**/*.js",
-      "use": "@vercel/node"
-    }
-  ],
-  "routes": [
-    {
-      "src": "/api/(.*)",
-      "dest": "/api/$1"
-    },
-    {
-      "src": "/\\.well-known/security\\.txt",
-      "dest": "/public/.well-known/security.txt",
-      "headers": {
-        "Content-Type": "text/plain; charset=utf-8"
-      }
-    },
-    {
-      "src": "/success",
-      "dest": "/public/success.html"
-    },
-    {
-      "src": "/cancel",
-      "dest": "/public/cancel.html"
-    },
-    {
-      "src": "/",
-      "dest": "/public/index.html"
-    },
-    {
-      "src": "/(.*)\\.html",
-      "dest": "/public/$1.html"
-    },
-    {
-      "src": "/(.*)\\.css",
-      "dest": "/public/$1.css"
-    },
-    {
-      "src": "/(.*)\\.js",
-      "dest": "/public/$1.js"
-    },
-    {
-      "src": "/(.*)\\.png",
-      "dest": "/public/$1.png"
-    },
-    {
-      "src": "/(.*)\\.ico",
-      "dest": "/public/$1.ico"
-    },
-    {
-      "src": "/(.*)\\.json",
-      "dest": "/public/$1.json"
-    },
-    {
-      "src": "/(.*)\\.jpg",
-      "dest": "/public/$1.jpg"
-    },
-    {
-      "src": "/robots.txt",
-      "dest": "/public/robots.txt"
-    },
-    {
-      "src": "/sitemap.xml",
-      "dest": "/public/sitemap.xml"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/public/404.html",
-      "status": 404
-    }
-  ],
+  "outputDirectory": "public",
+  "cleanUrls": true,
+  "trailingSlash": false,
   "headers": [
+    {
+      "source": "/.well-known/security.txt",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "text/plain; charset=utf-8"
+        }
+      ]
+    },
     {
       "source": "/(.*)",
       "headers": [
@@ -110,7 +46,5 @@
         }
       ]
     }
-  ],
-  "cleanUrls": true,
-  "trailingSlash": false
+  ]
 }
