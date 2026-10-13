@@ -9,8 +9,9 @@
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%23c17f24'/><text x='16' y='23' font-family='sans-serif' font-weight='700' font-size='10' fill='white'>RS</text></svg>">
   <link rel="stylesheet" href="css/styles.css" />
+  <script src="/js/config/flags.js"></script>
   <!-- SEO & Social -->
-  <meta name="description" content="Find qualified B2B leads by industry, location, company size, and technology stack. Export verified contact data." />
+  <meta name="description" content="Coming soon: find B2B leads by industry, location, company size and tech stack. Join the waitlist." />
   <meta name="robots" content="index, follow" />
   <link rel="canonical" href="https://leads.ronnascanner.com/" />
 
@@ -18,13 +19,13 @@
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://leads.ronnascanner.com/" />
   <meta property="og:title" content="RonnaScanner — Business Lead Scanner" />
-  <meta property="og:description" content="Find qualified B2B leads by industry, location, company size, and technology stack. Export verified contact data." />
+  <meta property="og:description" content="Coming soon: find B2B leads by industry, location, company size and tech stack. Join the waitlist." />
   <meta property="og:image" content="https://leads.ronnascanner.com/og-card.png" />
 
   <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="RonnaScanner — Business Lead Scanner" />
-  <meta name="twitter:description" content="Find qualified B2B leads by industry, location, company size, and technology stack. Export verified contact data." />
+  <meta name="twitter:description" content="Coming soon: find B2B leads by industry, location, company size and tech stack. Join the waitlist." />
   <meta name="twitter:image" content="https://leads.ronnascanner.com/og-card.png" />
 
   <!-- Theme color -->
@@ -48,16 +49,23 @@
   <nav class="nav" aria-label="Main navigation">
     <a href="/" class="nav-brand">ronna<span>.</span>scanner</a>
     <div class="nav-links">
-      <span class="plan-badge hidden" id="plan-badge"></span>
-      <a href="#signin" id="nav-login" class="nav-link">Sign In</a>
-      <button class="btn-upgrade-nav hidden" id="nav-upgrade">⚡ Upgrade</button>
-      <button class="btn-icon hidden" id="nav-manage">Manage Plan</button>
-      <a href="#signup" id="nav-signup" class="btn-nav">Sign Up</a>
+      <span class="plan-badge hidden" id="plan-badge" data-ronna-live></span>
+      <a href="#signin" id="nav-login" data-ronna-live class="nav-link">Sign In</a>
+      <button class="btn-upgrade-nav hidden" id="nav-upgrade" data-ronna-live>⚡ Upgrade</button>
+      <button class="btn-icon hidden" id="nav-manage" data-ronna-live>Manage Plan</button>
+      <a href="#waitlist" class="btn-nav" data-ronna-soon>Join the waitlist</a>
+      <a href="#signup" id="nav-signup" data-ronna-live class="btn-nav">Sign Up</a>
     </div>
   </nav>
 
+  <!-- RONNA-S8 status -->
+  <div class="coming-soon-banner" role="region" aria-label="Service status" data-ronna-soon>
+    <span class="badge-soon">Coming soon</span>
+    <span class="text-soon">The Lead Scanner is not open yet, so there is nothing to run or buy today. <a href="#waitlist">Join the waitlist</a></span>
+  </div>
+
   <!-- AUTH MODAL -->
-  <div class="modal-overlay hidden" id="auth-modal" role="dialog" aria-modal="true" aria-labelledby="auth-modal-title">
+  <div class="modal-overlay hidden" id="auth-modal" data-ronna-live role="dialog" aria-modal="true" aria-labelledby="auth-modal-title">
     <div class="modal">
       <button class="modal-close" id="modal-close" aria-label="Close dialog">&times;</button>
       <div class="modal-tabs">
@@ -82,13 +90,31 @@
   <!-- HERO -->
   <main id="main-content" tabindex="-1">
   <section class="hero">
-    <div class="hero-badge">AI-Powered Lead Scanner</div>
+    <div class="hero-badge">Business Lead Scanner</div>
     <h1 class="hero-title">Find <em>Qualified Leads</em><br />In Seconds</h1>
-    <p class="hero-sub">Scan any industry, location, or niche for verified business leads. Pull contact info, revenue data, and decision makers automatically.</p>
+    <p class="hero-sub">Scan any industry, location, or niche for business leads, with company details and decision makers in one list.</p>
   </section>
 
-  <!-- TOOL -->
-  <section class="tool-section" aria-label="Main tool" id="tool">
+  <!-- RONNA-S8 coming soon (Bridge MDO-S8 option c). Shown while RONNA_LIVE is false (js/config/flags.js). -->
+  <section class="soon-section" id="waitlist" data-ronna-soon aria-labelledby="soon-title">
+    <div class="soon-card">
+      <p class="soon-kicker">Status: coming soon</p>
+      <h2 id="soon-title">The Lead Scanner is not open yet</h2>
+      <p>When it opens, it will search for businesses by industry, location, company size and revenue range, and give you a list of companies with the contact details it can find for each.</p>
+      <p>The data service behind it is still being built. Until it is ready there is no scan to run and nothing to buy. Join the waitlist and we will write to you when it opens.</p>
+      <form class="waitlist-form" id="waitlist-form" data-source="leads" data-tool-name="Lead Scanner" novalidate>
+        <label class="field-label" for="waitlist-email">Your email</label>
+        <div class="waitlist-row">
+          <input type="email" class="input" id="waitlist-email" name="email" placeholder="you@company.com" autocomplete="email" required aria-describedby="waitlist-help" />
+          <button type="submit" class="btn-primary" id="waitlist-submit">Join the waitlist</button>
+        </div>
+        <p class="waitlist-msg" id="waitlist-msg" role="status" aria-live="polite"></p>
+      </form>
+      <p class="soon-note" id="waitlist-help">Joining opens your email app with a short message to hello@mdo3d.com. Nothing is sent until you press send. You can also <a href="mailto:hello@mdo3d.com?subject=Ronna%20Scanner%20waitlist%3A%20Lead%20Scanner">email us directly</a>.</p>
+    </div>
+  </section>
+
+  <section class="tool-section" aria-label="Main tool" id="tool" data-ronna-live>
     <div id="usage-meter-container"></div>
     <div class="tool-container">
 
@@ -218,7 +244,8 @@
     <p>© 2026 ronnascanner.com</p>
   </footer>
 
-  <script type="module" src="js/app.js"></script>
+  <script type="module" src="js/main.js"></script>
+  <script src="js/waitlist.js" defer></script>
 
   <script src="js/boot.js" defer></script>
 </body>

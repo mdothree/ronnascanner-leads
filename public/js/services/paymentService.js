@@ -20,14 +20,14 @@ export const PLANS = {
     priceId: STRIPE_PRO_PRICE_ID || "",
     price: 9.99,
     limits: { analyses: Infinity, saves: Infinity },
-    features: ["Unlimited uses", "Full results", "Save history", "Priority AI", "Export PDF"]
+    features: ["Unlimited uses", "Full results", "Save history"]
   },
   team: {
     name: "Team",
     priceId: STRIPE_TEAM_PRICE_ID || "",
     price: 29.99,
     limits: { analyses: Infinity, saves: Infinity },
-    features: ["Everything in Pro", "5 team members", "Team dashboard", "API access"]
+    features: ["Everything in Pro"]
   }
 };
 

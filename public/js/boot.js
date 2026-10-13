@@ -10,6 +10,8 @@
       navigator.serviceWorker.register("/sw.js").catch(function () {});
     });
   }
+  // RONNA-S8: no sign-in while the tool is coming soon (RONNA_LIVE false, js/config/flags.js).
+  if (window.RONNA_LIVE !== true) return;
   function modal() { return document.getElementById("auth-modal"); }
   function showTab(tab) {
     var btns = document.querySelectorAll(".tab-btn");

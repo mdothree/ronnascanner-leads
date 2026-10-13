@@ -375,7 +375,7 @@ body { font-family: 'Syne', 'DM Sans', sans-serif; background: var(--off-white);
 .nav-upgrade-hidden  { display: none !important; }
 .nav-manage-hidden   { display: none !important; }
 .nav-signup-hidden   { display: none !important; }
-.plan-badge          { display: none; }  /* shown by JS when plan != free */
+.plan-badge          { display: none; }  /* shown by JS when a paid plan is active */
 
 /* Shown states */
 .nav-upgrade-visible  { display: inline-block; }
@@ -751,3 +751,30 @@ a.btn-primary, a.btn-secondary { text-decoration:none; }
 [data-theme="dark"] .checkout-error { color: #FCA5A5; }
 [data-theme="dark"] .pricing-header { border-bottom-color: var(--gray-200); }
 .upgrade-link { color: inherit; font-weight: 700; text-decoration: underline; text-underline-offset: 2px; }
+
+/* ── RONNA-S8 coming soon + waitlist (Bridge MDO-S8 option c, 2026-10-13) ───────────────────────────
+   html[data-ronna] is set by js/config/flags.js (RONNA_LIVE). Anything not explicitly live stays hidden. */
+html:not([data-ronna="live"]) [data-ronna-live],
+html[data-ronna="live"] [data-ronna-soon] { display:none !important; }
+.coming-soon-banner { background: linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%); border-bottom: 1px solid #F59E0B; padding: .75rem 1.25rem; text-align: center; display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: .5rem 1rem; }
+.badge-soon { background: #B45309; color: #FFFFFF; padding: .25rem .75rem; border-radius: 999px; font-size: .75rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; }
+.text-soon { color: #78350F; font-size: .875rem; }
+.text-soon a, .text-soon a:hover { color: #78350F; font-weight: 700; text-decoration: underline; text-underline-offset: 2px; }
+.soon-section { padding: 3rem 1.25rem 4rem; }
+.soon-card { max-width: 640px; margin: 0 auto; background: var(--white); border: 1px solid var(--gray-200); border-radius: 20px; padding: 2rem; box-shadow: var(--shadow); }
+.soon-card .soon-kicker { margin: 0 0 .5rem; font-size: .8rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: #B45309; }
+.soon-card h2 { font-family: 'Syne', 'DM Sans', sans-serif; font-size: clamp(1.4rem, 3.5vw, 1.8rem); line-height: 1.2; color: var(--heading); margin: 0 0 1rem; }
+.soon-card p { margin: 0 0 1rem; color: var(--text); }
+.soon-card .soon-note { margin: 1rem 0 0; font-size: .875rem; color: var(--gray-700); }
+.soon-card a:not(.btn-primary) { color: var(--heading); font-weight: 700; text-decoration: underline; text-underline-offset: 2px; }
+.waitlist-form .field-label { margin-top: 0; }
+.waitlist-row { display: flex; flex-wrap: wrap; gap: .75rem; }
+.waitlist-row .input { flex: 1 1 220px; min-width: 0; }
+.waitlist-row .btn-primary { flex: 0 0 auto; }
+.waitlist-msg { min-height: 1.5em; margin: .75rem 0 0 !important; font-size: .9rem; font-weight: 500; }
+.waitlist-msg.is-error { color: #B91C1C; }
+.btn-primary:focus-visible, .btn-nav:focus-visible, .waitlist-row .input:focus-visible { outline: 3px solid #EA580C; outline-offset: 2px; }
+@media (max-width: 480px) { .soon-card { padding: 1.5rem 1.25rem; } .waitlist-row .btn-primary { width: 100%; } }
+@media (prefers-color-scheme: dark) { .soon-card .soon-kicker { color: #FDBA74; } .waitlist-msg.is-error { color: #FCA5A5; } }
+[data-theme="dark"] .soon-card .soon-kicker { color: #FDBA74; }
+[data-theme="dark"] .waitlist-msg.is-error { color: #FCA5A5; }

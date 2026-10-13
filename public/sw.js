@@ -1,11 +1,14 @@
 "use strict";
 
-const CACHE_NAME = "ronnascanner-leads-v4";
+const CACHE_NAME = "ronnascanner-leads-v5";
 const STATIC_ASSETS = [
   "/",
   "/index.html",
   "/css/styles.css",
   "/js/app.js",
+  "/js/main.js",
+  "/js/waitlist.js",
+  "/js/config/flags.js",
   "/js/boot.js",
   "/js/config/firebase.js",
   "/js/config/env.js",
@@ -46,6 +49,20 @@ self.addEventListener("fetch", event => {
     event.request.method !== "GET"
   ) {
     return; // fall through to network
+  }
+
+  // RONNA-S8: pages are network-first so a new deploy is seen on the next visit; the cache is the offline fallback.
+  if (event.request.mode === "navigate") {
+    event.respondWith(
+      fetch(event.request).then(res => {
+        if (res.ok && res.type === "basic") {
+          const clone = res.clone();
+          caches.open(CACHE_NAME).then(c => c.put(event.request, clone));
+        }
+        return res;
+      }).catch(() => caches.match(event.request).then(c => c || caches.match("/")))
+    );
+    return;
   }
 
   event.respondWith(
