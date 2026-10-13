@@ -536,24 +536,24 @@ body { font-family: 'Syne', 'DM Sans', sans-serif; background: var(--off-white);
 .error-page p { color: var(--gray-700); margin-bottom: 2rem; }
 
 /* ── Dark mode support ── */
-@media (prefers-color-scheme: dark) {
-  .skeleton {
+/* theme: was @media (prefers-color-scheme: dark) */
+  html[data-theme="dark"] .skeleton {
     background: linear-gradient(90deg, #1E293B 25%, #334155 50%, #1E293B 75%);
     background-size: 200% 100%;
   }
-  .toast { background: #0F172A; }
-}
+  html[data-theme="dark"] .toast { background: #0F172A; }
+
 /* ============================================================
    DARK MODE — prefers-color-scheme: dark
    Overrides CSS variables for automatic dark theme.
    Each platform keeps its accent colors; backgrounds invert.
    ============================================================ */
 
-@media (prefers-color-scheme: dark) {
+/* theme: was @media (prefers-color-scheme: dark) */
 
   /* ── rigor.design dark overrides ── */
-  .rigor-theme,
-  body:not(.mdothree-theme):not(.ronnascanner-theme) {
+  html[data-theme="dark"] .rigor-theme,
+  html[data-theme="dark"] body:not(.mdothree-theme):not(.ronnascanner-theme) {
     --off-white:   #0D1117;
     --white:       #161B22;
     --gray-100:    #1C2128;
@@ -567,7 +567,7 @@ body { font-family: 'Syne', 'DM Sans', sans-serif; background: var(--off-white);
   }
 
   /* ── mdothree.com dark overrides ── */
-  body {
+  html[data-theme="dark"] body {
     --off-white:   #0A0F1A;
     --white:       #111827;
     --gray-100:    #1F2937;
@@ -581,97 +581,97 @@ body { font-family: 'Syne', 'DM Sans', sans-serif; background: var(--off-white);
   }
 
   /* ── Common dark UI patterns ── */
-  .nav {
+  html[data-theme="dark"] .nav {
     background: rgba(10, 15, 26, 0.94);
     border-bottom-color: var(--gray-200);
   }
 
-  .tool-panel,
-  .result-panel,
-  .pricing-card,
-  .history-card,
-  .strategy-card,
-  .feedback-panel,
-  .answer-panel {
+  html[data-theme="dark"] .tool-panel,
+  html[data-theme="dark"] .result-panel,
+  html[data-theme="dark"] .pricing-card,
+  html[data-theme="dark"] .history-card,
+  html[data-theme="dark"] .strategy-card,
+  html[data-theme="dark"] .feedback-panel,
+  html[data-theme="dark"] .answer-panel {
     background: var(--white);
     border-color: var(--gray-200);
   }
 
-  .input {
+  html[data-theme="dark"] .input {
     background: var(--gray-100);
     border-color: var(--gray-200);
     color: var(--text);
   }
-  .input:focus { background: var(--white); }
-  .input::placeholder { color: var(--gray-400); }
+  html[data-theme="dark"] .input:focus { background: var(--white); }
+  html[data-theme="dark"] .input::placeholder { color: var(--gray-400); }
 
-  .drop-zone {
+  html[data-theme="dark"] .drop-zone {
     border-color: var(--gray-200);
     background: var(--gray-100);
   }
-  .drop-zone:hover,
-  .drop-zone.drag-over {
+  html[data-theme="dark"] .drop-zone:hover,
+  html[data-theme="dark"] .drop-zone.drag-over {
     background: rgba(16, 185, 129, 0.06);
   }
 
-  .modal {
+  html[data-theme="dark"] .modal {
     background: var(--white);
     border: 1px solid var(--gray-200);
   }
 
-  .stat-card,
-  .result-block,
-  .tool-card,
-  .hash-row,
-  .price-card,
-  .saved-card {
+  html[data-theme="dark"] .stat-card,
+  html[data-theme="dark"] .result-block,
+  html[data-theme="dark"] .tool-card,
+  html[data-theme="dark"] .hash-row,
+  html[data-theme="dark"] .price-card,
+  html[data-theme="dark"] .saved-card {
     background: var(--white);
     border-color: var(--gray-200);
   }
 
-  .footer,
-  .history-section { border-top-color: var(--gray-200); }
+  html[data-theme="dark"] .footer,
+  html[data-theme="dark"] .history-section { border-top-color: var(--gray-200); }
 
   /* ── Skeleton dark mode ── (already defined in enhancements.css) ── */
 
   /* ── Score card stays dark (navy/emerald/orange) — intentional ── */
-  .score-card { /* keeps its dark background */ }
+  html[data-theme="dark"] .score-card { /* keeps its dark background */ }
 
   /* ── Buttons — keep primary colors, adjust hover ── */
-  .btn-secondary {
+  html[data-theme="dark"] .btn-secondary {
     border-color: var(--gray-400);
     color: var(--text);
   }
-  .btn-secondary:hover {
+  html[data-theme="dark"] .btn-secondary:hover {
     background: var(--gray-200);
     color: var(--text);
   }
 
-  .btn-icon {
+  html[data-theme="dark"] .btn-icon {
     background: var(--gray-100);
     border-color: var(--gray-200);
     color: var(--text);
   }
-  .btn-icon:hover { background: var(--gray-200); }
+  html[data-theme="dark"] .btn-icon:hover { background: var(--gray-200); }
 
   /* ── Output panels (JSON, hash, text tools) ── */
-  .output-panel { background: #0D1117; }
-  .diff-view .diff-line.same { background: var(--gray-100); color: var(--text); }
+  html[data-theme="dark"] .output-panel { background: #0D1117; }
+  html[data-theme="dark"] .diff-view .diff-line.same { background: var(--gray-100); color: var(--text); }
 
   /* ── Table ── */
-  .results-table th { background: #161B22; }
-  .results-table td { border-bottom-color: var(--gray-200); color: var(--text); }
-  .results-table tr:hover td { background: var(--gray-100); }
+  html[data-theme="dark"] .results-table th { background: #161B22; }
+  html[data-theme="dark"] .results-table td { border-bottom-color: var(--gray-200); color: var(--text); }
+  html[data-theme="dark"] .results-table tr:hover td { background: var(--gray-100); }
 
   /* ── Toast stays dark-on-dark with lighter bg ── */
-  .toast { background: #1C2128; border-left-color: currentColor; }
+  html[data-theme="dark"] .toast { background: #1C2128; border-left-color: currentColor; }
 
   /* ── QR preview ── */
-  .qr-preview-box { background: var(--white); }
+  html[data-theme="dark"] .qr-preview-box { background: var(--white); }
 
   /* ── Color tool swatches adapt ── */
-  .color-fmt-row, .ts-row { background: var(--gray-100); }
-}
+  html[data-theme="dark"] .color-fmt-row, html[data-theme="dark"] .ts-row { background: var(--gray-100); }
+
 
 /* ── Manual dark mode toggle support (data-theme="dark") ── */
 [data-theme="dark"] {
@@ -702,10 +702,10 @@ body { font-family: 'Syne', 'DM Sans', sans-serif; background: var(--off-white);
 
 /* A11Y-003 (color-contrast, light theme): panel numbers #FDDCB5 were 1.3:1 on white (large text needs 3:1);
    footer text #94A3B8 was 2.5:1; "Soon" badge white on #D97706 was 3.2:1. */
-@media not all and (prefers-color-scheme: dark) {
-  .panel-num { color: #EA580C; }
-  .footer, .footer p { color: #64748B; }
-}
+/* theme: was @media not all and (prefers-color-scheme: dark) */
+  html:not([data-theme="dark"]) .panel-num { color: #EA580C; }
+  html:not([data-theme="dark"]) .footer, html:not([data-theme="dark"]) .footer p { color: #64748B; }
+
 .badge-soon { background: #B45309; }
 
 /* ── VISUAL-P0 2026-10-13 (ronna subs, shared) ───────────────────────────────
@@ -716,7 +716,7 @@ body { font-family: 'Syne', 'DM Sans', sans-serif; background: var(--off-white);
 .nav-brand span, .nav-brand .scanner { color:var(--orange); }
 .panel-num { color:#EA580C; }
 .error-page-code { opacity:1; color:#C2410C; }
-@media (prefers-color-scheme: dark) { .error-page-code { color:#EA580C; } }
+/* theme: was @media (prefers-color-scheme: dark) */ html[data-theme="dark"] .error-page-code { color:#EA580C; } 
 [data-theme="dark"] .error-page-code { color:#EA580C; }
 .filter-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:0 1rem; }
 .tool-tabs { display:flex; flex-wrap:wrap; gap:.35rem; width:fit-content; max-width:100%; margin:0 0 1.25rem; padding:.3rem;
@@ -731,7 +731,7 @@ body { font-family: 'Syne', 'DM Sans', sans-serif; background: var(--off-white);
 .tool-actions { margin-top:1.25rem; }
 .payment-status-card h2, .error-page h2, .error-page-code { font-family:'Syne','DM Sans',sans-serif; color:var(--heading); }
 .error-page-code { color:#C2410C; }
-@media (prefers-color-scheme: dark) { .error-page-code { color:#EA580C; } }
+/* theme: was @media (prefers-color-scheme: dark) */ html[data-theme="dark"] .error-page-code { color:#EA580C; } 
 [data-theme="dark"] .error-page-code { color:#EA580C; }
 a.btn-primary, a.btn-secondary { text-decoration:none; }
 @media (max-width:420px) { .tool-tabs { display:grid; grid-template-columns:repeat(3,1fr); } .tool-tab { padding:.55rem .25rem; font-size:.78rem; } }
@@ -747,7 +747,7 @@ a.btn-primary, a.btn-secondary { text-decoration:none; }
 .pricing-close:focus-visible, .plan-btn:focus-visible, .pricing-promo-link:focus-visible { outline: 3px solid var(--accent, #F97316); outline-offset: 2px; }
 .stripe-checkout-mount { min-height: 200px; }
 .checkout-error { color: #B91C1C; padding: 1rem; }
-@media (prefers-color-scheme: dark) { .checkout-error { color: #FCA5A5; } .pricing-header { border-bottom-color: var(--gray-200); } }
+/* theme: was @media (prefers-color-scheme: dark) */ html[data-theme="dark"] .checkout-error { color: #FCA5A5; } html[data-theme="dark"] .pricing-header { border-bottom-color: var(--gray-200); } 
 [data-theme="dark"] .checkout-error { color: #FCA5A5; }
 [data-theme="dark"] .pricing-header { border-bottom-color: var(--gray-200); }
 .upgrade-link { color: inherit; font-weight: 700; text-decoration: underline; text-underline-offset: 2px; }
@@ -775,6 +775,6 @@ html[data-ronna="live"] [data-ronna-soon] { display:none !important; }
 .waitlist-msg.is-error { color: #B91C1C; }
 .btn-primary:focus-visible, .btn-nav:focus-visible, .waitlist-row .input:focus-visible { outline: 3px solid #EA580C; outline-offset: 2px; }
 @media (max-width: 480px) { .soon-card { padding: 1.5rem 1.25rem; } .waitlist-row .btn-primary { width: 100%; } }
-@media (prefers-color-scheme: dark) { .soon-card .soon-kicker { color: #FDBA74; } .waitlist-msg.is-error { color: #FCA5A5; } }
+/* theme: was @media (prefers-color-scheme: dark) */ html[data-theme="dark"] .soon-card .soon-kicker { color: #FDBA74; } html[data-theme="dark"] .waitlist-msg.is-error { color: #FCA5A5; } 
 [data-theme="dark"] .soon-card .soon-kicker { color: #FDBA74; }
 [data-theme="dark"] .waitlist-msg.is-error { color: #FCA5A5; }

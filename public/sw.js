@@ -1,6 +1,6 @@
 "use strict";
 
-const CACHE_NAME = "ronnascanner-leads-v5";
+const CACHE_NAME = "ronnascanner-leads-v6"; // bumped: theme toggle (html[data-theme]) CSS + JS
 const STATIC_ASSETS = [
   "/",
   "/index.html",
