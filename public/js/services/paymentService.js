@@ -12,13 +12,9 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 // ─── Plan config (update keys per project) ──────────────────────────────────
+// Paid plans only (decision #94): no zero-price tier. Paid from first use;
+// early access is granted with promo codes.
 export const PLANS = {
-  free: {
-    name: "Basic",
-    price: 0,
-    limits: { analyses: 3, saves: 5 },
-    features: ["3 uses per month", "Basic results", "No history"]
-  },
   pro: {
     name: "Pro",
     priceId: STRIPE_PRO_PRICE_ID || "",
@@ -34,6 +30,15 @@ export const PLANS = {
     features: ["Everything in Pro", "5 team members", "Team dashboard", "API access"]
   }
 };
+
+// Usage cap for accounts without a paid plan (a preview cap, not a plan).
+// When it is reached the paywall offers the paid plans + early-access codes.
+export const PREVIEW_LIMIT = 3;
+
+// A subscription counts only if it maps to a paid plan above.
+export function hasPaidPlan(sub) {
+  return !!(sub && PLANS[sub.plan]);
+}
 
 // ─── Checkout gate (fails closed) ────────────────────────────────────────────
 export const CHECKOUT_OPEN = PRO_CHECKOUT_ENABLED && !!STRIPE_KEY;
@@ -65,22 +70,21 @@ function loadScript(src) {
 export async function getSubscription(userId) {
   try {
     const snap = await getDoc(doc(db, "subscriptions", userId));
-    if (!snap.exists()) return { plan: "free", status: "none" };
+    if (!snap.exists()) return { plan: "none", status: "none" };
     return snap.data();
   } catch {
-    return { plan: "free", status: "none" };
+    return { plan: "none", status: "none" };
   }
 }
 
 export function onSubscriptionChange(userId, callback) {
   return onSnapshot(doc(db, "subscriptions", userId), snap => {
-    callback(snap.exists() ? snap.data() : { plan: "free", status: "none" });
+    callback(snap.exists() ? snap.data() : { plan: "none", status: "none" });
   });
 }
 
 export async function isPro(userId) {
-  const sub = await getSubscription(userId);
-  return sub.plan === "pro" || sub.plan === "team";
+  return hasPaidPlan(await getSubscription(userId));
 }
 
 // ─── Usage tracking ───────────────────────────────────────────────────────────
