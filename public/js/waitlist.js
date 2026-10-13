@@ -26,7 +26,7 @@
     var input = document.getElementById("waitlist-email");
     var msg = document.getElementById("waitlist-msg");
     var source = form.getAttribute("data-source") || "ronna";
-    var tool = plain(form.getAttribute("data-tool-name")) || "Ronna Scanner";
+    var tool = plain(form.getAttribute("data-tool-name")) || "RonnaScanner";
 
     form.addEventListener("submit", function (ev) {
       ev.preventDefault();
@@ -40,8 +40,8 @@
       }
       input.removeAttribute("aria-invalid");
       msg.classList.remove("is-error");
-      var subject = "Ronna Scanner waitlist: " + tool;
-      var body = "Please add " + email + " to the Ronna Scanner waitlist for the " + tool + ".\n\n" +
+      var subject = "RonnaScanner waitlist: " + tool;
+      var body = "Please add " + email + " to the RonnaScanner waitlist for the " + tool + ".\n\n" +
         "source=" + source + "\n" +
         "page=" + window.location.origin + window.location.pathname;
       open("mailto:" + INBOX + "?subject=" + encodeURIComponent(subject) + "&body=" + encodeURIComponent(body));

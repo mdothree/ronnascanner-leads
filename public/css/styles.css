@@ -778,3 +778,8 @@ html[data-ronna="live"] [data-ronna-soon] { display:none !important; }
 /* theme: was @media (prefers-color-scheme: dark) */ html[data-theme="dark"] .soon-card .soon-kicker { color: #FDBA74; } html[data-theme="dark"] .waitlist-msg.is-error { color: #FCA5A5; } 
 [data-theme="dark"] .soon-card .soon-kicker { color: #FDBA74; }
 [data-theme="dark"] .waitlist-msg.is-error { color: #FCA5A5; }
+
+/* LEGAL-SUBSITES-MISSING: footer Privacy/Terms links take the footer colour (contrast-checked) and stay underlined */
+.footer a { color: inherit; text-decoration: underline; }
+/* CONTENT-BRAND-INCONSISTENT: the full RonnaScanner wordmark must not push the nav past a 390px viewport */
+@media (max-width:480px) { .nav { gap:.5rem; flex-wrap:wrap; row-gap:.5rem; } .nav-brand { font-size:1.05rem; } .nav-links { flex-wrap:wrap; justify-content:flex-end; margin-left:auto; } }

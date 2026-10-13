@@ -18,7 +18,7 @@ import {
 
 const NO_PLAN = { plan: "none", status: "none" };
 const EARLY_ACCESS_MAILTO =
-  "mailto:hello@mdo3d.com?subject=" + encodeURIComponent("Ronna Scanner early-access code");
+  "mailto:hello@mdo3d.com?subject=" + encodeURIComponent("RonnaScanner early-access code");
 
 let _userId = null;
 let _subscription = { ...NO_PLAN };
@@ -100,8 +100,8 @@ export function showPricingModal(highlightPlan = "pro", limitInfo = null) {
   _lastFocus = document.activeElement;
   const current = currentPlanKey();
   const subline = limitInfo && Number.isFinite(limitInfo.limit)
-    ? `You've used ${limitInfo.used ?? limitInfo.limit} of ${limitInfo.limit} preview ${esc(limitInfo.action || "use")}s this month. Ronna Scanner is a paid tool.`
-    : "Ronna Scanner is a paid tool. Pick the plan that fits your work.";
+    ? `You've used ${limitInfo.used ?? limitInfo.limit} of ${limitInfo.limit} preview ${esc(limitInfo.action || "use")}s this month. RonnaScanner is a paid tool.`
+    : "RonnaScanner is a paid tool. Pick the plan that fits your work.";
 
   const overlay = document.createElement("div");
   overlay.id = "pricing-modal-overlay";
