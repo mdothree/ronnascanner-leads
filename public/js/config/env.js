@@ -50,7 +50,7 @@ const STATUS_MESSAGES = {
   0:   "The scanner service is unavailable right now. No results were generated.",
   400: "That request was not accepted. Check the fields and try again.",
   401: "Sign in to use RonnaScanner.",
-  402: "RonnaScanner is a paid tool. A Pro or Team plan is required. No results were generated.",
+  402: "RonnaScanner is a paid tool. A Pro plan is required. No results were generated.",
   403: "You can only act on your own account.",
   404: "Not found.",
   409: "This account already has an active plan. Use Manage plan to change it.",

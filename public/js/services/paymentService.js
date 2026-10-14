@@ -24,14 +24,14 @@ import {
 // Paid plans only (decision #94): no zero-price tier, paid from first use; early
 // access is a Stripe promotion code entered at checkout.
 // Features list only what the API does today. Pro and Team unlock the same thing
-// on the server (lib/quota.js PAID_PLANS); Team adds nothing yet, so it claims
-// nothing extra. Price: not set yet (flat whole dollars, no *.99; JARVIS
-// MDO-RONNA-PRICE). With price null the cards say the price is shown at checkout,
-// where Stripe shows the real amount.
+// on the server (lib/quota.js PAID_PLANS); Team adds nothing yet, so it is hidden
+// (decision 2026-10-14: Pro $10/mo, Team hidden until it has a team feature). The
+// Team key stays so an existing Team subscription is still recognised (hasPaidPlan).
+// Flat whole dollars, no *.99. Checkout stays closed (coming soon) until the API is live.
 export const PLANS = {
   pro: {
     name: "Pro",
-    price: null,
+    price: 10,
     features: [
       "Lead scans: up to 100 companies per scan",
       "Email finder by name and company domain",
@@ -41,6 +41,7 @@ export const PLANS = {
   },
   team: {
     name: "Team",
+    hidden: true,
     price: null,
     features: ["Everything in Pro"]
   }

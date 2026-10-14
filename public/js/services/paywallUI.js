@@ -75,7 +75,7 @@ export function handleApiError(err, action = "scan") {
   if (status === 401) showAuthPrompt();
   if (status === 402) showUpgradePrompt(action);
   const title = status === 501 ? "This tool isn't open yet."
-    : status === 402 ? "A Pro or Team plan is required."
+    : status === 402 ? "A Pro plan is required."
     : status === 401 ? "Sign in to continue."
     : status === 429 ? "Too many requests."
     : "The scanner service is unavailable right now.";
@@ -106,8 +106,8 @@ export function showPricingModal(highlightPlan = "pro", limitInfo = null) {
   _lastFocus = document.activeElement;
   const current = currentPlanKey();
   const subline = limitInfo
-    ? `A Pro or Team plan is required to run ${esc(limitInfo.action || "scan")}s. RonnaScanner is a paid tool.`
-    : "RonnaScanner is a paid tool. Pick the plan that fits your work.";
+    ? `A Pro plan is required to run ${esc(limitInfo.action || "scan")}s. RonnaScanner is a paid tool.`
+    : "RonnaScanner is a paid tool. Pro is $10/mo.";
 
   const overlay = document.createElement("div");
   overlay.id = "pricing-modal-overlay";
@@ -120,7 +120,7 @@ export function showPricingModal(highlightPlan = "pro", limitInfo = null) {
         <p id="pricing-modal-desc">${subline}</p>
       </div>
       <div class="pricing-cards">
-        ${Object.entries(PLANS).map(([key, plan]) => `
+        ${Object.entries(PLANS).filter(([key, plan]) => !plan.hidden || current === key).map(([key, plan]) => `
           <div class="pricing-card ${key === highlightPlan ? "highlighted" : ""} ${current === key ? "current" : ""}">
             ${current === key ? '<div class="current-badge">Current plan</div>'
               : key === highlightPlan ? '<div class="popular-badge">Recommended</div>' : ""}
@@ -228,7 +228,7 @@ export function showUpgradePrompt(action = "scan") {
     <div class="upgrade-content">
       <div class="upgrade-icon" aria-hidden="true">🚀</div>
       <div class="upgrade-text">
-        <strong>A Pro or Team plan is required to run ${esc(action)}s</strong>
+        <strong>A Pro plan is required to run ${esc(action)}s</strong>
         <p>${CHECKOUT_OPEN
           ? "No results were generated. Choose a plan to continue."
           : `No results were generated. Plans are coming soon. Have an early-access code? <a href="${EARLY_ACCESS_MAILTO}" class="upgrade-link">Contact us</a>.`}</p>
@@ -294,7 +294,7 @@ export async function renderUsageMeter(containerId, action) {
   }
   container.innerHTML = `
     <div class="usage-meter">
-      <div class="usage-label"><span>A Pro or Team plan is required to run ${esc(action)}.</span><button type="button" class="usage-upgrade">See plans</button></div>
+      <div class="usage-label"><span>A Pro plan is required to run ${esc(action)}.</span><button type="button" class="usage-upgrade">See plans</button></div>
     </div>`;
   container.querySelector(".usage-upgrade").addEventListener("click", () => showPricingModal("pro"));
 }
