@@ -96,16 +96,8 @@ export async function upsertUserProfile(userId, data) {
 
 // ─── Usage helpers ────────────────────────────────────────────────────────────
 
-export async function incrementUsage(userId, action) {
-  const month = new Date().toISOString().slice(0, 7);
-  const ref = doc(db, "usage", `${userId}_${month}`);
-  await setDoc(ref, {
-    [action]: (await getUsageCount(userId, action)) + 1,
-    userId, month,
-    updatedAt: serverTimestamp()
-  }, { merge: true });
-}
-
+// Usage is counted by the scanner API (Admin SDK); Firestore rules deny client
+// writes to usage/*, so there is no client-side increment.
 export async function getUsageCount(userId, action) {
   const month = new Date().toISOString().slice(0, 7);
   const snap = await getDoc(doc(db, "usage", `${userId}_${month}`));

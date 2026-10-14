@@ -26,46 +26,88 @@ export const STRIPE_KEY = isLocalhost
   ? env("VITE_STRIPE_PUBLISHABLE_KEY_TEST", env("VITE_STRIPE_PUBLISHABLE_KEY", ""))
   : env("VITE_STRIPE_PUBLISHABLE_KEY_LIVE", env("VITE_STRIPE_PUBLISHABLE_KEY", ""));
 
-export const STRIPE_PRO_PRICE_ID = isLocalhost
-  ? env("VITE_STRIPE_PRO_PRICE_ID_TEST",  env("VITE_STRIPE_PRO_PRICE_ID", ""))
-  : env("VITE_STRIPE_PRO_PRICE_ID_LIVE",  env("VITE_STRIPE_PRO_PRICE_ID", ""));
-
-export const STRIPE_TEAM_PRICE_ID = isLocalhost
-  ? env("VITE_STRIPE_TEAM_PRICE_ID_TEST", env("VITE_STRIPE_TEAM_PRICE_ID", ""))
-  : env("VITE_STRIPE_TEAM_PRICE_ID_LIVE", env("VITE_STRIPE_TEAM_PRICE_ID", ""));
+// Price ids live on the server only (STRIPE_PRO_PRICE_IDS / STRIPE_TEAM_PRICE_IDS):
+// checkout sends the plan key "pro" | "team" and the API resolves it.
 
 // ─── Feature flags ────────────────────────────────────────────────────────────
 export const ENABLE_PAYMENTS   = env("VITE_ENABLE_PAYMENTS",     "true") === "true";
-export const FREE_TIER_LIMIT   = parseInt(env("VITE_FREE_TIER_LIMIT", "3"), 10);
 
-// ─── Convenience fetch wrapper (injects API_URL + auth token) ─────────────────
+// ─── API errors ───────────────────────────────────────────────────────────────
+// The scanner API (mdothree/ronnascanner-api, AUDIT §7a) answers JSON errors:
+//   { error: "<code>", message: "<user-safe text>" }   (429 sends only { error: "<text>" })
+// apiFetch throws an ApiError carrying the HTTP status, so callers can show the
+// paywall on 402, "not open yet" on 501, and an honest message for the rest.
+export class ApiError extends Error {
+  constructor(status, code, message) {
+    super(message || code || `Request failed (${status})`);
+    this.name = "ApiError";
+    this.status = status;   // 0 = network failure (no response)
+    this.code = code || null;
+  }
+}
+
+const STATUS_MESSAGES = {
+  0:   "The scanner service is unavailable right now. No results were generated.",
+  400: "That request was not accepted. Check the fields and try again.",
+  401: "Sign in to use RonnaScanner.",
+  402: "RonnaScanner is a paid tool. A Pro or Team plan is required. No results were generated.",
+  403: "You can only act on your own account.",
+  404: "Not found.",
+  409: "This account already has an active plan. Use Manage plan to change it.",
+  413: "That request is too large.",
+  429: "Too many requests. Please wait a moment and try again.",
+  501: "This tool isn't open yet. No results were generated.",
+  502: "The data provider is unavailable right now. No results were generated.",
+  503: "This service isn't connected yet. No results were generated."
+};
+
+/** Honest, user-facing text for any error thrown by apiFetch (or anything else). */
+export function apiErrorMessage(err) {
+  if (!(err instanceof ApiError)) return STATUS_MESSAGES[0];
+  // 501 / 402 always use our own wording so every tool says the same thing.
+  if (err.status === 501 || err.status === 402) return STATUS_MESSAGES[err.status];
+  // The API's own message is written for users and never carries internals.
+  if (err.status !== 0 && err.serverMessage) return err.serverMessage;
+  return STATUS_MESSAGES[err.status] || "Something went wrong on our side. No results were generated.";
+}
+
+// ─── Fetch wrapper (same-origin /api/* + Firebase ID token) ───────────────────
+// Every scanner and payment route requires `Authorization: Bearer <Firebase ID
+// token>`; the API takes the uid from the verified token, never from the body.
+// No user signed in -> ApiError 401 without a network call.
 import { auth } from "./firebase.js";
 
 export async function apiFetch(path, body, options = {}) {
   const url = API_URL ? `${API_URL}${path}` : path;
-  const headers = { "Content-Type": "application/json", ...options.headers };
-
-  // Attach Firebase auth token if user is logged in
   const user = auth.currentUser;
-  if (user) {
-    try {
-      const token = await user.getIdToken();
-      headers["Authorization"] = `Bearer ${token}`;
-    } catch {
-      // proceed without token (public endpoint)
-    }
+  if (!user) throw new ApiError(401, "unauthorized", STATUS_MESSAGES[401]);
+  let token;
+  try {
+    token = await user.getIdToken();
+  } catch {
+    throw new ApiError(401, "invalid_token", "Your session has expired. Sign in again.");
   }
 
-  const res = await fetch(url, {
-    method: options.method || "POST",
-    headers,
-    body: body !== undefined ? JSON.stringify(body) : undefined,
-    ...options
-  });
+  let res;
+  try {
+    res = await fetch(url, {
+      method: options.method || "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+      body: body !== undefined ? JSON.stringify(body) : undefined
+    });
+  } catch {
+    throw new ApiError(0, "network_error", STATUS_MESSAGES[0]);
+  }
 
   if (!res.ok) {
-    const err = await res.json().catch(() => ({ error: `HTTP ${res.status}` }));
-    throw new Error(err.error || `Request failed: ${res.status}`);
+    const data = await res.json().catch(() => ({}));
+    // Error shape: { error: code, message } — except 429, which sends { error: text }.
+    const hasMessage = typeof data.message === "string" && data.message;
+    const code = hasMessage ? data.error : (res.status === 429 ? "rate_limited" : data.error);
+    const err = new ApiError(res.status, typeof code === "string" ? code : null,
+      hasMessage ? data.message : (STATUS_MESSAGES[res.status] || `Request failed (${res.status})`));
+    err.serverMessage = hasMessage ? data.message : (res.status === 429 && typeof data.error === "string" ? data.error : null);
+    throw err;
   }
   // Returns the parsed JSON body. Callers must NOT call .json() again.
   return res.json();

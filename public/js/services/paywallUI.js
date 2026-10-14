@@ -7,14 +7,17 @@
  * with addEventListener inside this module.
  * Pricing: paid plans only (decision #94). Early access = promo codes.
  * Checkout: fails closed. Plan buttons call checkout only when CHECKOUT_OPEN.
+ * Entitlement: the scanner API is the gate (402 without a paid plan, before any
+ * data-provider call) and counts usage server-side. This module never writes
+ * usage or subscription docs; it shows the API's answer honestly.
  */
 
 import {
-  PLANS, PREVIEW_LIMIT, CHECKOUT_OPEN, hasPaidPlan,
-  getSubscription, onSubscriptionChange,
-  checkLimit, trackUsage,
+  PLANS, CHECKOUT_OPEN, hasPaidPlan,
+  getSubscription, onSubscriptionChange, getUsage,
   mountEmbeddedCheckout, openCustomerPortal
 } from "./paymentService.js";
+import { ApiError, apiErrorMessage } from "../config/env.js";
 
 const NO_PLAN = { plan: "none", status: "none" };
 const EARLY_ACCESS_MAILTO =
@@ -29,13 +32,9 @@ function currentPlanKey() {
   return hasPaidPlan(_subscription) ? _subscription.plan : null;
 }
 
-function limitFor(action) {
-  const key = currentPlanKey();
-  return key ? (PLANS[key].limits?.[action] ?? Infinity) : PREVIEW_LIMIT;
-}
-
+// Flat whole dollars (no *.99). null = not set yet: Stripe shows the amount at checkout.
 function fmtPrice(n) {
-  return `$${Number(n).toFixed(2)}`;
+  return Number.isFinite(n) ? `$${Math.round(n)}<span>/mo</span>` : `<span class="plan-price-tbd">Price shown at checkout</span>`;
 }
 
 function esc(s) {
@@ -60,20 +59,27 @@ export async function initPaywall(userId) {
 }
 
 // ─── Gate check ──────────────────────────────────────────────────────────────
+// Sign-in is checked here; the plan check is the API's (402). No client-side
+// counter: the server meters paid calls and has no unpaid allowance.
 export async function gate(action, onAllowed, onBlocked) {
-  if (!_userId) { showAuthPrompt(); return; }
+  if (!_userId) { onBlocked?.(); showAuthPrompt(); return; }
+  return onAllowed();
+}
 
-  const limit = limitFor(action);
-  const { allowed, reason, used, limit: lim } = await checkLimit(_userId, action, limit);
-
-  if (allowed) {
-    await trackUsage(_userId, action);
-    onAllowed();
-  } else {
-    if (reason === "login") { showAuthPrompt(); return; }
-    onBlocked?.();
-    showUpgradePrompt(action, used, lim);
-  }
+/**
+ * Handle an error from a scanner call. Shows the sign-in prompt on 401 and the
+ * paywall on 402. Returns { title, detail } for the tool's empty state.
+ */
+export function handleApiError(err, action = "scan") {
+  const status = err instanceof ApiError ? err.status : 0;
+  if (status === 401) showAuthPrompt();
+  if (status === 402) showUpgradePrompt(action);
+  const title = status === 501 ? "This tool isn't open yet."
+    : status === 402 ? "A Pro or Team plan is required."
+    : status === 401 ? "Sign in to continue."
+    : status === 429 ? "Too many requests."
+    : "The scanner service is unavailable right now.";
+  return { status, title, detail: apiErrorMessage(err) };
 }
 
 // ─── Pricing modal ────────────────────────────────────────────────────────────
@@ -84,7 +90,7 @@ function planButtonHtml(key, plan) {
       ? `<button type="button" class="plan-btn manage-btn" data-paywall-action="portal">Manage plan</button>`
       : `<button type="button" class="plan-btn soon-btn" disabled>Billing portal coming soon</button>`;
   }
-  if (!CHECKOUT_OPEN || !plan.priceId) {
+  if (!CHECKOUT_OPEN) {
     return `<button type="button" class="plan-btn soon-btn" disabled>${esc(plan.name)} — coming soon</button>`;
   }
   const verb = current ? "Switch to" : "Get";
@@ -92,15 +98,15 @@ function planButtonHtml(key, plan) {
 }
 
 /**
- * @param {string} highlightPlan plan key to badge as most popular
- * @param {{action?:string, used?:number, limit?:number}} [limitInfo] set when opened from a usage-limit hit
+ * @param {string} highlightPlan plan key to badge as recommended (no "most popular": there is no sales data)
+ * @param {{action?:string}} [limitInfo] set when opened from a 402 (no paid plan)
  */
 export function showPricingModal(highlightPlan = "pro", limitInfo = null) {
   removePricingModal();
   _lastFocus = document.activeElement;
   const current = currentPlanKey();
-  const subline = limitInfo && Number.isFinite(limitInfo.limit)
-    ? `You've used ${limitInfo.used ?? limitInfo.limit} of ${limitInfo.limit} preview ${esc(limitInfo.action || "use")}s this month. RonnaScanner is a paid tool.`
+  const subline = limitInfo
+    ? `A Pro or Team plan is required to run ${esc(limitInfo.action || "scan")}s. RonnaScanner is a paid tool.`
     : "RonnaScanner is a paid tool. Pick the plan that fits your work.";
 
   const overlay = document.createElement("div");
@@ -117,9 +123,9 @@ export function showPricingModal(highlightPlan = "pro", limitInfo = null) {
         ${Object.entries(PLANS).map(([key, plan]) => `
           <div class="pricing-card ${key === highlightPlan ? "highlighted" : ""} ${current === key ? "current" : ""}">
             ${current === key ? '<div class="current-badge">Current plan</div>'
-              : key === highlightPlan ? '<div class="popular-badge">Most popular</div>' : ""}
+              : key === highlightPlan ? '<div class="popular-badge">Recommended</div>' : ""}
             <h3 class="plan-name">${esc(plan.name)}</h3>
-            <div class="plan-price">${fmtPrice(plan.price)}<span>/mo</span></div>
+            <div class="plan-price">${fmtPrice(plan.price)}</div>
             <ul class="plan-features">
               ${plan.features.map(f => `<li>✓ ${esc(f)}</li>`).join("")}
             </ul>
@@ -148,8 +154,7 @@ export function showPricingModal(highlightPlan = "pro", limitInfo = null) {
     btn.addEventListener("click", () => {
       const act = btn.dataset.paywallAction;
       if (act === "checkout") {
-        const plan = PLANS[btn.dataset.plan];
-        if (plan) startEmbeddedCheckout(plan.priceId, btn.dataset.plan);
+        if (PLANS[btn.dataset.plan]) startEmbeddedCheckout(btn.dataset.plan);
       } else if (act === "portal") {
         openPortal();
       }
@@ -184,13 +189,14 @@ function showCheckoutError(msg) {
 async function openPortal() {
   if (!CHECKOUT_OPEN) return;
   try {
-    await openCustomerPortal(_userId);
+    await openCustomerPortal();
   } catch (e) {
-    showCheckoutError(`Billing portal unavailable: ${(e && e.message) || "please try again"}`);
+    if (e instanceof ApiError && e.status === 401) { closePricingModal(); showAuthPrompt(); return; }
+    showCheckoutError(`Billing portal unavailable: ${e instanceof ApiError ? apiErrorMessage(e) : ((e && e.message) || "please try again")}`);
   }
 }
 
-async function startEmbeddedCheckout(priceId, planKey) {
+async function startEmbeddedCheckout(planKey) {
   if (!CHECKOUT_OPEN) return; // fail closed: never reach Stripe while checkout is gated
   if (!_userId) { closePricingModal(); showAuthPrompt(); return; }
   const container = document.getElementById("stripe-embedded-container");
@@ -201,18 +207,19 @@ async function startEmbeddedCheckout(priceId, planKey) {
   mount.className = "stripe-checkout-mount";
   container.replaceChildren(mount);
   try {
-    const checkout = await mountEmbeddedCheckout("stripe-checkout-mount", priceId, _userId);
+    const checkout = await mountEmbeddedCheckout("stripe-checkout-mount", planKey);
     // Store reference for cleanup
     window._stripeCheckout = checkout;
   } catch (e) {
-    showCheckoutError(`Checkout failed: ${(e && e.message) || "the payment form could not load"}`);
+    if (e instanceof ApiError && e.status === 401) { closePricingModal(); showAuthPrompt(); return; }
+    // 409 already subscribed, 503 not open, 429, 400: the API's own message is honest.
+    showCheckoutError(`Checkout failed: ${e instanceof ApiError ? apiErrorMessage(e) : ((e && e.message) || "the payment form could not load")}`);
   }
 }
 
-// ─── Upgrade prompt (inline banner) ──────────────────────────────────────────
-export function showUpgradePrompt(action, used, limit) {
+// ─── Upgrade prompt (inline banner, shown on a 402) ──────────────────────────
+export function showUpgradePrompt(action = "scan") {
   removeUpgradePrompt();
-  const pro = PLANS.pro;
   const banner = document.createElement("div");
   banner.id = "upgrade-prompt";
   banner.className = "upgrade-prompt";
@@ -221,10 +228,10 @@ export function showUpgradePrompt(action, used, limit) {
     <div class="upgrade-content">
       <div class="upgrade-icon" aria-hidden="true">🚀</div>
       <div class="upgrade-text">
-        <strong>You've used ${used} of ${limit} preview ${esc(action)}s this month</strong>
+        <strong>A Pro or Team plan is required to run ${esc(action)}s</strong>
         <p>${CHECKOUT_OPEN
-          ? `Pro is ${fmtPrice(pro.price)}/mo for unlimited ${esc(action)}s.`
-          : `Pro (${fmtPrice(pro.price)}/mo) is coming soon. Have an early-access code? <a href="${EARLY_ACCESS_MAILTO}" class="upgrade-link">Contact us</a>.`}</p>
+          ? "No results were generated. Choose a plan to continue."
+          : `No results were generated. Plans are coming soon. Have an early-access code? <a href="${EARLY_ACCESS_MAILTO}" class="upgrade-link">Contact us</a>.`}</p>
       </div>
       <button type="button" class="upgrade-cta" id="upgrade-cta-btn">See plans</button>
       <button type="button" class="upgrade-dismiss" id="upgrade-dismiss-btn" aria-label="Dismiss">&times;</button>
@@ -232,7 +239,7 @@ export function showUpgradePrompt(action, used, limit) {
   // Insert after hero or at top of tool section
   const toolSection = document.querySelector(".tool-section") || document.body;
   toolSection.insertBefore(banner, toolSection.firstChild);
-  banner.querySelector("#upgrade-cta-btn").addEventListener("click", () => showPricingModal("pro", { action, used, limit }));
+  banner.querySelector("#upgrade-cta-btn").addEventListener("click", () => showPricingModal("pro", { action }));
   banner.querySelector("#upgrade-dismiss-btn").addEventListener("click", removeUpgradePrompt);
 }
 
@@ -270,27 +277,26 @@ function updateUI() {
 }
 
 // ─── Usage meter widget ───────────────────────────────────────────────────────
+// Paid: this month's count, read from the API-written usage doc (read-only).
+// No paid plan: says a plan is required (there is no unpaid allowance to meter).
 export async function renderUsageMeter(containerId, action) {
   const container = document.getElementById(containerId);
   if (!container || !_userId) return;
-  const limit = limitFor(action);
-  if (limit === Infinity) {
-    const span = document.createElement("span");
+  const span = document.createElement("span");
+  if (currentPlanKey()) {
+    const used = await getUsage(_userId, action);
     span.className = "usage-unlimited";
-    span.textContent = `✓ Unlimited ${action}s`;
+    span.textContent = used === null
+      ? `${PLANS[currentPlanKey()].name} plan active`
+      : `${PLANS[currentPlanKey()].name} plan · ${used} ${action} this month`;
     container.replaceChildren(span);
     return;
   }
-  const { used = 0 } = await checkLimit(_userId, action, limit);
-  const pct = Math.min(100, (used / limit) * 100);
   container.innerHTML = `
     <div class="usage-meter">
-      <div class="usage-label"><span>${used} / ${limit} preview ${esc(action)}s used</span><button type="button" class="usage-upgrade">See plans</button></div>
-      <div class="usage-bar"><div class="usage-fill ${pct > 80 ? "warning" : ""}"></div></div>
+      <div class="usage-label"><span>A Pro or Team plan is required to run ${esc(action)}.</span><button type="button" class="usage-upgrade">See plans</button></div>
     </div>`;
-  container.querySelector(".usage-fill").style.width = `${pct}%`;
-  container.querySelector(".usage-upgrade").addEventListener("click", () =>
-    showPricingModal("pro", used >= limit ? { action, used, limit } : null));
+  container.querySelector(".usage-upgrade").addEventListener("click", () => showPricingModal("pro"));
 }
 
 export function getCurrentPlan() { return currentPlanKey() || "none"; }

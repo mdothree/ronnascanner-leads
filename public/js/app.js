@@ -2,7 +2,7 @@ import { authService } from "./services/authService.js";
 import { saveDoc, getUserDocs, getDoc_, tsToString } from "./services/firestoreService.js";
 import { apiFetch } from "./config/env.js";
 import { toast } from "./utils/toast.js";
-import { initPaywall, gate, showPricingModal, renderUsageMeter } from "./services/paywallUI.js";
+import { initPaywall, gate, showPricingModal, renderUsageMeter, handleApiError } from "./services/paywallUI.js";
 import { showSkeleton, escapeHtml } from "./utils/helpers.js";
 
 // ─── State ────────────────────────────────────────────────────────────────────
@@ -85,9 +85,8 @@ async function runScan() {
   const industry    = document.getElementById("industry").value.trim();
   const location    = document.getElementById("location").value.trim();
   const companySize = document.getElementById("company-size").value;
-  const revenue     = document.getElementById("revenue-range").value;
   const keywords    = document.getElementById("keywords").value.trim();
-  const count       = parseInt(document.getElementById("lead-count").value);
+  const count       = parseInt(document.getElementById("lead-count").value, 10) || 25;
 
   // Show progress
   document.querySelector(".btn-text").classList.add("hidden");
@@ -96,25 +95,28 @@ async function runScan() {
   document.getElementById("scan-progress").classList.remove("hidden");
   document.getElementById("results-section").classList.add("hidden");
 
+  // Shows the request being sent; it does not claim work the server has not done.
   await animateScan([
-    `Searching...`,
     `Searching ${industry} companies in ${location || "all locations"}...`,
-    `Applying filters: size=${companySize || "any"}, revenue=${revenue || "any"}...`,
-    `Scoring leads by match quality...`,
-    `Finalizing ${count} results...`
+    `Filters: size=${companySize || "any"}${keywords ? `, keywords=${keywords}` : ""}, up to ${count} results`
   ]);
 
   // Show skeleton table while scanning
   document.getElementById("results-section").classList.remove("hidden");
   showSkeleton("results-tbody", 8, "row");
+  // API contract (ronnascanner-api /api/leads/scan): { industry, location, companySize,
+  // keywords, count<=100 } -> { leads: [{ company, website, industry, location, size,
+  // revenue, contactName, contactTitle }], total, source }. Missing fields are null.
+  let failure = null;
   try {
-    const data = await apiFetch("/api/leads/scan", { industry, location, companySize, revenue, keywords, count });
-    currentResults = data?.leads || null;
-  } catch {
+    const data = await apiFetch("/api/leads/scan", { industry, location, companySize, keywords, count });
+    currentResults = Array.isArray(data?.leads) ? data.leads : null;
+  } catch (err) {
     currentResults = null;
+    failure = handleApiError(err, "scan");
   }
 
-  if (currentResults) renderResults(currentResults); else showUnavailable();
+  if (currentResults) renderResults(currentResults); else showUnavailable(failure);
   renderUsageMeter("usage-meter-container", "scans");
   document.getElementById("scan-progress").classList.add("hidden");
   document.querySelector(".btn-text").classList.remove("hidden");
@@ -148,23 +150,23 @@ function animateScan(steps) {
 function renderResults(leads) {
   document.getElementById("result-count").textContent = leads.length;
   const tbody = document.getElementById("results-tbody");
+  if (!leads.length) {
+    tbody.innerHTML = '<tr><td colspan="7"><div class="empty-state" role="status"><p><strong>No companies matched these filters.</strong></p><p>Try a broader industry or location.</p></div></td></tr>';
+    document.getElementById("results-section").classList.remove("hidden");
+    return;
+  }
   tbody.innerHTML = leads.map((l, i) => `
     <tr>
       <td><input type="checkbox" class="row-check" data-i="${i}" /></td>
       <td>
-        <strong>${escapeHtml(l.company)}</strong><br />
-        <span class="tag tag-gray">${escapeHtml(l.website)}</span>
+        <strong>${escapeHtml(l.company || "—")}</strong><br />
+        ${l.website ? `<span class="tag tag-gray">${escapeHtml(l.website)}</span>` : ""}
       </td>
-      <td>${escapeHtml(l.industry)}</td>
-      <td>${escapeHtml(l.location)}</td>
+      <td>${escapeHtml(l.industry || "—")}</td>
+      <td>${escapeHtml(l.location || "—")}</td>
       <td>${escapeHtml(l.size || "—")}</td>
       <td>
-        ${l.contactName ? `<strong>${escapeHtml(l.contactName)}</strong><br /><small>${escapeHtml(l.contactTitle)}</small>` : "—"}
-      </td>
-      <td>
-        <span class="tag ${l.score >= 80 ? "tag-green" : l.score >= 60 ? "tag-orange" : "tag-gray"}">
-          ${escapeHtml(l.score)}
-        </span>
+        ${l.contactName ? `<strong>${escapeHtml(l.contactName)}</strong>${l.contactTitle ? `<br /><small>${escapeHtml(l.contactTitle)}</small>` : ""}` : "—"}
       </td>
       <td>
         <button class="btn-icon view-btn" data-i="${i}">View</button>
@@ -183,9 +185,9 @@ function renderResults(leads) {
 // ─── Export ───────────────────────────────────────────────────────────────────
 document.getElementById("btn-export-csv").addEventListener("click", () => {
   if (!currentResults.length) return;
-  const headers = ["Company", "Industry", "Location", "Size", "Contact", "Title", "Score", "Website"];
+  const headers = ["Company", "Industry", "Location", "Size", "Revenue", "Contact", "Title", "Website"];
   const rows = currentResults.map(l =>
-    [l.company, l.industry, l.location, l.size, l.contactName, l.contactTitle, l.score, l.website]
+    [l.company, l.industry, l.location, l.size, l.revenue, l.contactName, l.contactTitle, l.website]
       .map(v => `"${(v || "").toString().replace(/"/g, '""')}"`)
       .join(",")
   );
@@ -276,7 +278,10 @@ async function loadSavedLists() {
 }
 
 // RONNA-MOCK-FALLBACK: never fabricate results when the scanner API is unavailable.
-function showUnavailable() {
+// `failure` is handleApiError's { status, title, detail } (402 paywall, 501 not open, ...).
+function showUnavailable(failure) {
+  const title = failure?.title || "The scanner service is unavailable right now.";
+  const detail = failure?.detail || "No results were generated. Please try again later.";
   // Keep the results table in the DOM so a later successful scan can render into it.
   currentResults = [];
   document.getElementById("results-section")?.classList.remove("hidden");
@@ -284,7 +289,7 @@ function showUnavailable() {
   if (count) count.textContent = "0";
   const tbody = document.getElementById("results-tbody");
   if (tbody) {
-    tbody.innerHTML = '<tr><td colspan="8"><div class="empty-state" role="status"><p><strong>The scanner service is unavailable right now.</strong></p><p>No results were generated. Please try again later.</p></div></td></tr>';
+    tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state" role="status"><p><strong>${escapeHtml(title)}</strong></p><p>${escapeHtml(detail)}</p></div></td></tr>`;
   }
-  toast.error("Scanner service unavailable. No results were generated.");
+  toast.error(detail);
 }

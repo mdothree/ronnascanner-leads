@@ -1,43 +1,56 @@
-import { STRIPE_KEY, STRIPE_PRO_PRICE_ID, STRIPE_TEAM_PRICE_ID, PRO_CHECKOUT_ENABLED } from "../config/env.js";
+import { STRIPE_KEY, PRO_CHECKOUT_ENABLED, apiFetch, ApiError } from "../config/env.js";
 
 /**
  * paymentService.js
- * Handles Stripe Checkout sessions + subscription state via Firebase
- * Uses Stripe Embedded Elements (Payment Element) — no redirect needed
+ * Subscription state (read-only from Firestore) + Stripe checkout / billing portal
+ * through the scanner API (mdothree/ronnascanner-api, AUDIT §7a).
+ *
+ * Contract with the API:
+ *  - Every payment call sends `Authorization: Bearer <Firebase ID token>` (apiFetch).
+ *    The API takes the user from the token. No userId is ever sent.
+ *  - Checkout sends only the plan key ("pro" | "team") and the tool name. The server
+ *    owns the Stripe price and the success / cancel URLs; sending a URL, an amount
+ *    or a price object is refused with 400.
+ *  - subscriptions/{uid} and usage/{uid}_{YYYY-MM} are written only by the API
+ *    (Admin SDK). Firestore rules deny client writes, so this module only reads them.
  */
 
-import { auth, db } from "../config/firebase.js";
+import { db } from "../config/firebase.js";
 import {
-  doc, getDoc, setDoc, onSnapshot, collection, addDoc, serverTimestamp
+  doc, getDoc, onSnapshot
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-// ─── Plan config (update keys per project) ──────────────────────────────────
-// Paid plans only (decision #94): no zero-price tier. Paid from first use;
-// early access is granted with promo codes.
+// ─── Plans ───────────────────────────────────────────────────────────────────
+// Paid plans only (decision #94): no zero-price tier, paid from first use; early
+// access is a Stripe promotion code entered at checkout.
+// Features list only what the API does today. Pro and Team unlock the same thing
+// on the server (lib/quota.js PAID_PLANS); Team adds nothing yet, so it claims
+// nothing extra. Price: not set yet (flat whole dollars, no *.99; JARVIS
+// MDO-RONNA-PRICE). With price null the cards say the price is shown at checkout,
+// where Stripe shows the real amount.
 export const PLANS = {
   pro: {
     name: "Pro",
-    priceId: STRIPE_PRO_PRICE_ID || "",
-    price: 9.99,
-    limits: { analyses: Infinity, saves: Infinity },
-    features: ["Unlimited uses", "Full results", "Save history"]
+    price: null,
+    features: [
+      "Lead scans: up to 100 companies per scan",
+      "Email finder by name and company domain",
+      "Save results to your account",
+      "CSV and JSON export"
+    ]
   },
   team: {
     name: "Team",
-    priceId: STRIPE_TEAM_PRICE_ID || "",
-    price: 29.99,
-    limits: { analyses: Infinity, saves: Infinity },
+    price: null,
     features: ["Everything in Pro"]
   }
 };
 
-// Usage cap for accounts without a paid plan (a preview cap, not a plan).
-// When it is reached the paywall offers the paid plans + early-access codes.
-export const PREVIEW_LIMIT = 3;
+const ACTIVE_STATUSES = ["active", "trialing"];
 
-// A subscription counts only if it maps to a paid plan above.
+// Mirrors the API's isPaidSubscription: a Pro/Team plan in an active status.
 export function hasPaidPlan(sub) {
-  return !!(sub && PLANS[sub.plan]);
+  return !!(sub && Object.prototype.hasOwnProperty.call(PLANS, sub.plan) && ACTIVE_STATUSES.includes(sub.status));
 }
 
 // ─── Checkout gate (fails closed) ────────────────────────────────────────────
@@ -47,13 +60,28 @@ function assertCheckoutOpen() {
   if (!CHECKOUT_OPEN) throw new Error(CHECKOUT_CLOSED_MSG);
 }
 
+// The tool this page is (leads, emails, ...). The API uses it to pick the fixed
+// success / cancel pages; it falls back to the allowlisted Origin when absent.
+const TOOLS = ["leads", "emails", "contacts", "companies", "prospects"];
+export function currentTool() {
+  const host = (typeof location !== "undefined" && location.hostname) || "";
+  const sub = host.split(".")[0];
+  return TOOLS.includes(sub) ? sub : null;
+}
+
+function checkoutBody(planKey) {
+  if (!Object.prototype.hasOwnProperty.call(PLANS, planKey)) throw new ApiError(400, "unknown_price", "Unknown plan.");
+  const tool = currentTool();
+  return tool ? { priceId: planKey, tool } : { priceId: planKey };
+}
+
 // ─── Stripe loader ────────────────────────────────────────────────────────────
 let _stripe = null;
-async function getStripe() {
+async function getStripe(publishableKey) {
   assertCheckoutOpen();
   if (_stripe) return _stripe;
   await loadScript("https://js.stripe.com/v3/");
-  _stripe = Stripe(STRIPE_KEY);
+  _stripe = Stripe(STRIPE_KEY || publishableKey);
   return _stripe;
 }
 
@@ -66,7 +94,7 @@ function loadScript(src) {
   });
 }
 
-// ─── Subscription state ───────────────────────────────────────────────────────
+// ─── Subscription state (read-only) ──────────────────────────────────────────
 export async function getSubscription(userId) {
   try {
     const snap = await getDoc(doc(db, "subscriptions", userId));
@@ -80,84 +108,45 @@ export async function getSubscription(userId) {
 export function onSubscriptionChange(userId, callback) {
   return onSnapshot(doc(db, "subscriptions", userId), snap => {
     callback(snap.exists() ? snap.data() : { plan: "none", status: "none" });
-  });
+  }, () => callback({ plan: "none", status: "none" }));
 }
 
 export async function isPro(userId) {
   return hasPaidPlan(await getSubscription(userId));
 }
 
-// ─── Usage tracking ───────────────────────────────────────────────────────────
-export async function trackUsage(userId, action) {
-  const month = new Date().toISOString().slice(0, 7); // "2025-01"
-  const ref = doc(db, "usage", `${userId}_${month}`);
-  const snap = await getDoc(ref);
-  const current = snap.exists() ? snap.data() : {};
-  const count = (current[action] || 0) + 1;
-  await setDoc(ref, { ...current, [action]: count, userId, month }, { merge: true });
-  return count;
-}
-
+// ─── Usage (read-only; the API counts paid calls server-side) ─────────────────
 export async function getUsage(userId, action) {
   const month = new Date().toISOString().slice(0, 7);
-  const snap = await getDoc(doc(db, "usage", `${userId}_${month}`));
-  return snap.exists() ? (snap.data()[action] || 0) : 0;
+  try {
+    const snap = await getDoc(doc(db, "usage", `${userId}_${month}`));
+    return snap.exists() ? (snap.data()[action] || 0) : 0;
+  } catch {
+    return null; // unknown, not zero
+  }
 }
 
-export async function checkLimit(userId, action, limit) {
-  if (!userId) return { allowed: false, reason: "login" };
-  if (limit === Infinity) return { allowed: true };
-  const used = await getUsage(userId, action);
-  if (used >= limit) return { allowed: false, reason: "limit", used, limit };
-  return { allowed: true, used, limit };
-}
-
-// ─── Stripe Checkout (server-side session) ────────────────────────────────────
-export async function createCheckoutSession(userId, priceId, successUrl, cancelUrl) {
+// ─── Stripe Checkout (redirect flow) ──────────────────────────────────────────
+export async function createCheckoutSession(planKey) {
   assertCheckoutOpen();
-  const res = await fetch("/api/payment/create-session", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ userId, priceId, successUrl, cancelUrl })
-  });
-  if (!res.ok) throw new Error("Failed to create checkout session");
-  return res.json(); // { sessionId, url }
+  return apiFetch("/api/payment/create-session", checkoutBody(planKey)); // { sessionId, url }
 }
 
-// ─── Stripe Embedded Checkout (Payment Element) ───────────────────────────────
-export async function mountEmbeddedCheckout(containerId, priceId, userId) {
+// ─── Stripe Embedded Checkout ─────────────────────────────────────────────────
+export async function mountEmbeddedCheckout(containerId, planKey) {
   assertCheckoutOpen();
-  const stripe = await getStripe();
-
-  // Get client secret from server
-  const res = await fetch("/api/payment/create-embedded-session", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ priceId, userId })
-  });
-  if (!res.ok) throw new Error("Failed to initialize checkout");
-  const { clientSecret } = await res.json();
-
+  const { clientSecret, publishableKey } = await apiFetch("/api/payment/create-embedded-session", checkoutBody(planKey));
+  if (!clientSecret) throw new Error("the payment form could not load");
+  const stripe = await getStripe(publishableKey);
   const checkout = await stripe.initEmbeddedCheckout({ clientSecret });
   checkout.mount(`#${containerId}`);
   return checkout; // call checkout.destroy() to unmount
 }
 
-// ─── Customer portal ──────────────────────────────────────────────────────────
-export async function openCustomerPortal(userId) {
+// ─── Customer portal (the caller's own account only) ─────────────────────────
+export async function openCustomerPortal() {
   assertCheckoutOpen();
-  const res = await fetch("/api/payment/portal", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ userId })
-  });
-  const { url } = await res.json();
+  const { url } = await apiFetch("/api/payment/portal", {});
+  if (!url || !/^https:\/\//.test(url)) throw new Error("the billing portal could not open");
   window.location.href = url;
-}
-
-// ─── Log payment event ────────────────────────────────────────────────────────
-export async function logPaymentEvent(userId, event) {
-  await addDoc(collection(db, "payment_events"), {
-    userId, ...event, createdAt: serverTimestamp()
-  });
 }
