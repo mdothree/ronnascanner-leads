@@ -6,9 +6,9 @@
   <title>RonnaScanner Leads — Business Lead Scanner</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <script src="/js/theme-init.js"></script><link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23c17f24'/%3E%3Ctext x='16' y='23' font-family='sans-serif' font-weight='700' font-size='10' fill='white'%3ERS%3C/text%3E%3C/svg%3E">
-  <link rel="stylesheet" href="css/styles.css" /><link rel="stylesheet" href="/css/theme-toggle.css" />
+  <script src="/js/theme-init.js"></script><link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@500;600;700&amp;family=IBM+Plex+Sans:wght@400;500;600;700&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap" rel="stylesheet" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='3' fill='%23141311'/%3E%3Ctext x='16' y='21' text-anchor='middle' font-family='IBM Plex Sans,Arial,sans-serif' font-weight='700' font-size='13' fill='%23F3F0E9'%3ERS%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="css/mdo-brand.css" /><link rel="stylesheet" href="css/styles.css" /><link rel="stylesheet" href="/css/theme-toggle.css" />
   <script src="/js/config/flags.js"></script>
   <!-- SEO & Social -->
   <meta name="description" content="Coming soon: find B2B leads by industry, location, company size and tech stack. Join the waitlist." />
@@ -30,7 +30,7 @@
 
   <!-- Theme color -->
   <link rel="manifest" href="/manifest.json" />
-  <meta name="theme-color" content="#F97316" />
+  <meta name="theme-color" content="#F3F0E9" />
   <!-- IMG-RONNASUB-NO-ICONS / SEO-008 / SEO-004 (cycle 8) -->
   <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png" />
   <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png" />
@@ -42,16 +42,16 @@
   <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "RonnaScanner Business Lead Scanner", "url": "https://leads.ronnascanner.com/", "applicationCategory": "BusinessApplication", "operatingSystem": "Web", "isPartOf": {"@type": "WebSite", "name": "RonnaScanner", "url": "https://ronnascanner.com/"}}</script>
   <script src="/js/consent.js" defer></script>
 </head>
-<body>
+<body class="mdo f-data">
   <a href="#main-content" class="skip-link">Skip to main content</a>
   
   <!-- NAV -->
   <nav class="nav" aria-label="Main navigation">
-    <a href="/" class="nav-brand">RonnaScanner</a>
+    <a href="/" class="nav-brand" aria-label="RonnaScanner Lead Scanner"><span class="rs-mark" aria-hidden="true">RS</span><span class="nav-word">RonnaScanner</span><span class="nav-tool">Lead Scanner</span></a>
     <div class="nav-links">
       <span class="plan-badge hidden" id="plan-badge" data-ronna-live hidden></span>
       <a href="#signin" id="nav-login" data-ronna-live hidden class="nav-link">Sign In</a>
-      <button class="btn-upgrade-nav hidden" id="nav-upgrade" data-ronna-live hidden>⚡ Upgrade</button>
+      <button class="btn-upgrade-nav hidden" id="nav-upgrade" data-ronna-live hidden>Upgrade</button>
       <button class="btn-icon hidden" id="nav-manage" data-ronna-live hidden>Manage Plan</button>
       <a href="#waitlist" class="btn-nav" data-ronna-soon>Join the waitlist</a>
       <a href="#signup" id="nav-signup" data-ronna-live hidden class="btn-nav">Sign Up</a>
@@ -168,7 +168,7 @@
       <!-- Action Bar -->
       <div class="tool-actions">
         <button class="btn-primary large" id="btn-scan">
-          <span class="btn-text">🔍 Scan for Leads</span>
+          <span class="btn-text">Scan for Leads</span>
           <span class="btn-loader hidden">Scanning...</span>
         </button>
       </div>
@@ -192,9 +192,9 @@
             Found <strong id="result-count">0</strong> leads matching your criteria
           </div>
           <div class="export-actions">
-            <button class="btn-icon" id="btn-export-csv">⬇️ Export CSV</button>
-            <button class="btn-icon" id="btn-export-json">⬇️ Export JSON</button>
-            <button class="btn-icon" id="btn-save-list">💾 Save List</button>
+            <button class="btn-icon" id="btn-export-csv">Export CSV</button>
+            <button class="btn-icon" id="btn-export-json">Export JSON</button>
+            <button class="btn-icon" id="btn-save-list">Save List</button>
           </div>
         </div>
 
@@ -233,7 +233,7 @@
   </main>
 
   <footer class="footer">
-    <p>© 2026 ronnascanner.com · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · <a href="/refund">Refunds</a> · <a href="/contact">Contact</a></p>
+    <p><span class="footer-entity">© 2026 RonnaScanner, an MDO3D product</span> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · <a href="/refund">Refunds</a> · <a href="/contact">Contact</a></p>
   </footer>
 
   <script type="module" src="js/main.js"></script>
