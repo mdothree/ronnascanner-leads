@@ -1,16 +1,16 @@
 /* RonnaScanner tool apps: MDO "data" family, sub-brand Ronna (brand v1, 2026-10-16).
-   Tokens: css/mdo-brand.css (copy of mdo3d shared/brand/mdo-brand.css, loaded first) + shared/brand/tokens.json.
+   Tokens: css/ronna-brand.css (Ronna's own tokens, loaded first).
    One stylesheet for all five tools (companies, contacts, emails, leads, prospects). Every class the JS
    renders is styled here; no IDs or classes were renamed.
    Rules: radius <= 4px, no pills, no one-sided accent borders, no gradients, no emoji icons. */
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-/* light = data family default; dark = data family dark (theme-init.js sets html[data-theme]) */
+/* light = Ronna default; dark = Ronna dark (theme-init.js sets html[data-theme]) */
 html { scroll-behavior: smooth; }
-html[data-theme="dark"] .f-data { --bg:#111111; --fg:#ECE8E1; --mute:#8D877E; --rule:#2B2A28; --surface:#181816; --accent:#D9483B; --on-accent:#111111; --ok:#5FA36F; --warn:#D4A23A; }
-.f-data { --err:#B4381F; --wash:rgba(20,19,17,.04); }
-html[data-theme="dark"] .f-data { --err:#E5685C; --wash:rgba(236,232,225,.04); }
+html[data-theme="dark"] .ronna { --bg:#111111; --fg:#ECE8E1; --mute:#8D877E; --rule:#2B2A28; --surface:#181816; --accent:#D9483B; --on-accent:#111111; --ok:#5FA36F; --warn:#D4A23A; }
+.ronna { --err:#B4381F; --wash:rgba(20,19,17,.04); }
+html[data-theme="dark"] .ronna { --err:#E5685C; --wash:rgba(236,232,225,.04); }
 
 body { background:var(--bg); color:var(--fg); font-family:var(--body); font-size:16px; line-height:1.55; -webkit-font-smoothing:antialiased; min-height:100vh; display:flex; flex-direction:column; }
 main { flex:1 0 auto; }

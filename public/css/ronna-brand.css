@@ -1,7 +1,7 @@
-/* MDO3 brand v1 (2026-10-16). CSS mirror of shared/brand/tokens.json for every MDO family.
-   Usage: <body class="f-data"> (or f-guidance, f-index, f-tools, f-rigor). Copy this file into a static app
-   (apps are deployed separately; there is no shared import at runtime).
-   Rules: radius <= 4px, no pills, no one-sided accent borders, no emoji icons, hairline rules, one offer + one next step. */
+/* Ronna identity (2026-10-16). Ronna keeps its own identity, separate from the MDO family tokens
+   (Principal review 10-16: "i dont think it needs to be continuous with ronna scanner").
+   Values unchanged from the brand pass: paper, ink, one red accent, IBM Plex. Body class: "rs ronna".
+   Rules: radius <= 4px, no pills, no one-sided accent borders, no emoji icons, hairline rules. */
 
 :root{
   --ui:"Inter Tight",system-ui,-apple-system,sans-serif;
@@ -14,24 +14,19 @@
 }
 @media (max-width:720px){ :root{ --gutter:16px; --t-h2:26px; --t-h1:38px; --t-display:46px; --t-lead:19px; } }
 
-.f-index   { --bg:#0E0D0C; --fg:#EEE8DD; --mute:#9C958A; --rule:#2A2724; --surface:#161513; --accent:#E2B13C; --on-accent:#0E0D0C; --display:"Inter Tight",sans-serif; --body:"EB Garamond",Georgia,serif; }
-.f-guidance{ --bg:#14111B; --fg:#EDE6D8; --mute:#A79F92; --rule:#3A3345; --surface:#1B1724; --accent:#C9A24A; --on-accent:#14111B; --display:"Cormorant Garamond",Georgia,serif; --body:"EB Garamond",Georgia,serif; }
-.f-guidance.light{ --bg:#F4EFE6; --fg:#1C1824; --mute:#6B6373; --rule:#D8CFC0; --surface:#FBF8F2; --accent:#8E6B1F; --on-accent:#FBF8F2; }
-.f-data    { --bg:#F3F0E9; --fg:#141311; --mute:#6E685F; --rule:#D5CFC3; --surface:#FBF9F4; --accent:#B4381F; --on-accent:#FBF9F4; --ok:#2F6B3E; --warn:#9A6A12; --display:"IBM Plex Sans","Inter Tight",sans-serif; --body:"IBM Plex Sans",system-ui,sans-serif; }
-.f-data.dark{ --bg:#111111; --fg:#ECE8E1; --mute:#8D877E; --rule:#2B2A28; --surface:#181816; --accent:#D9483B; --on-accent:#111111; --ok:#5FA36F; --warn:#D4A23A; }
-.f-tools   { --bg:#0F1115; --fg:#E9ECEF; --mute:#8B939E; --rule:#252A31; --surface:#161A20; --accent:#10B981; --on-accent:#0F1115; --display:"Inter Tight",sans-serif; --body:"Inter Tight",system-ui,sans-serif; --mono:"JetBrains Mono","IBM Plex Mono",monospace; }
-.f-rigor   { --bg:#0D1526; --fg:#EEF1F6; --mute:#9AA6BA; --rule:#25324A; --surface:#121D33; --accent:#D4A84B; --on-accent:#0D1526; --display:"Playfair Display",Georgia,serif; --body:"Inter Tight",system-ui,sans-serif; }
+.ronna    { --bg:#F3F0E9; --fg:#141311; --mute:#6E685F; --rule:#D5CFC3; --surface:#FBF9F4; --accent:#B4381F; --on-accent:#FBF9F4; --ok:#2F6B3E; --warn:#9A6A12; --display:"IBM Plex Sans","Inter Tight",sans-serif; --body:"IBM Plex Sans",system-ui,sans-serif; }
+.ronna.dark{ --bg:#111111; --fg:#ECE8E1; --mute:#8D877E; --rule:#2B2A28; --surface:#181816; --accent:#D9483B; --on-accent:#111111; --ok:#5FA36F; --warn:#D4A23A; }
 
 /* base */
-.mdo{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:var(--t-body);line-height:1.55;-webkit-font-smoothing:antialiased}
-.mdo .wrap{max-width:var(--maxw);margin:0 auto;padding:0 var(--gutter)}
-.mdo .label{font-family:var(--ui);font-size:var(--t-label);font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--mute)}
-.mdo .display{font-family:var(--display);font-size:var(--t-display);line-height:1.04;letter-spacing:-.025em;font-weight:600}
-.mdo h1{font-family:var(--display);font-size:var(--t-h1);line-height:1.08;letter-spacing:-.02em}
-.mdo h2{font-family:var(--display);font-size:var(--t-h2);line-height:1.12;letter-spacing:-.015em}
-.mdo .lead{font-size:var(--t-lead);color:var(--fg);max-width:36em}
-.mdo .num{font-family:var(--mono);font-variant-numeric:tabular-nums}
-.mdo :focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.rs{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:var(--t-body);line-height:1.55;-webkit-font-smoothing:antialiased}
+.rs .wrap{max-width:var(--maxw);margin:0 auto;padding:0 var(--gutter)}
+.rs .label{font-family:var(--ui);font-size:var(--t-label);font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--mute)}
+.rs .display{font-family:var(--display);font-size:var(--t-display);line-height:1.04;letter-spacing:-.025em;font-weight:600}
+.rs h1{font-family:var(--display);font-size:var(--t-h1);line-height:1.08;letter-spacing:-.02em}
+.rs h2{font-family:var(--display);font-size:var(--t-h2);line-height:1.12;letter-spacing:-.015em}
+.rs .lead{font-size:var(--t-lead);color:var(--fg);max-width:36em}
+.rs .num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.rs :focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 
 /* header / footer: identical structure on every MDO site */
 .mdo-hdr{display:flex;align-items:center;justify-content:space-between;min-height:var(--hdr-h);border-bottom:1px solid var(--rule);gap:var(--s5)}
