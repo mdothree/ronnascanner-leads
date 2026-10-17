@@ -1,0 +1,63 @@
+/* Ronna identity (2026-10-16). Ronna keeps its own identity, separate from the MDO family tokens
+   (Principal review 10-16: "i dont think it needs to be continuous with ronna scanner").
+   Values unchanged from the brand pass: paper, ink, one red accent, IBM Plex. Body class: "rs ronna".
+   Rules: radius <= 4px, no pills, no one-sided accent borders, no emoji icons, hairline rules. */
+
+:root{
+  --ui:"Inter Tight",system-ui,-apple-system,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,monospace;
+  --r-sm:2px; --r-md:3px; --r-lg:4px;
+  --maxw:1264px; --gutter:48px; --hdr-h:72px;
+  --s1:4px;--s2:8px;--s3:12px;--s4:16px;--s5:24px;--s6:32px;--s7:48px;--s8:64px;--s9:96px;
+  --t-label:12px;--t-small:14px;--t-body:17px;--t-lead:21px;--t-h3:22px;--t-h2:34px;--t-h1:56px;--t-display:76px;
+  --ease:cubic-bezier(.2,.7,.2,1);
+}
+@media (max-width:720px){ :root{ --gutter:16px; --t-h2:26px; --t-h1:38px; --t-display:46px; --t-lead:19px; } }
+
+.ronna    { --bg:#F3F0E9; --fg:#141311; --mute:#6E685F; --rule:#D5CFC3; --surface:#FBF9F4; --accent:#B4381F; --on-accent:#FBF9F4; --ok:#2F6B3E; --warn:#9A6A12; --display:"IBM Plex Sans","Inter Tight",sans-serif; --body:"IBM Plex Sans",system-ui,sans-serif; }
+.ronna.dark{ --bg:#111111; --fg:#ECE8E1; --mute:#8D877E; --rule:#2B2A28; --surface:#181816; --accent:#D9483B; --on-accent:#111111; --ok:#5FA36F; --warn:#D4A23A; }
+
+/* base */
+.rs{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:var(--t-body);line-height:1.55;-webkit-font-smoothing:antialiased}
+.rs .wrap{max-width:var(--maxw);margin:0 auto;padding:0 var(--gutter)}
+.rs .label{font-family:var(--ui);font-size:var(--t-label);font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--mute)}
+.rs .display{font-family:var(--display);font-size:var(--t-display);line-height:1.04;letter-spacing:-.025em;font-weight:600}
+.rs h1{font-family:var(--display);font-size:var(--t-h1);line-height:1.08;letter-spacing:-.02em}
+.rs h2{font-family:var(--display);font-size:var(--t-h2);line-height:1.12;letter-spacing:-.015em}
+.rs .lead{font-size:var(--t-lead);color:var(--fg);max-width:36em}
+.rs .num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.rs :focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* header / footer: identical structure on every MDO site */
+.mdo-hdr{display:flex;align-items:center;justify-content:space-between;min-height:var(--hdr-h);border-bottom:1px solid var(--rule);gap:var(--s5)}
+.mdo-hdr .mark{display:flex;align-items:center;gap:10px;font-family:var(--ui);font-weight:700;font-size:17px;letter-spacing:-.01em}
+.mdo-hdr nav{display:flex;gap:var(--s5);font-family:var(--ui);font-size:13px;font-weight:600;letter-spacing:.08em;text-transform:uppercase}
+.mdo-hdr nav a[aria-current]{color:var(--accent)}
+.mdo-ftr{display:flex;flex-wrap:wrap;justify-content:space-between;gap:var(--s4);padding:var(--s6) 0 var(--s7);border-top:1px solid var(--rule);font-family:var(--ui);font-size:13px;color:var(--mute)}
+.mdo-ftr a{color:var(--mute)} .mdo-ftr a:hover{color:var(--fg)}
+
+/* components */
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:44px;font-family:var(--ui);font-weight:600;font-size:15px;padding:12px 22px;border-radius:var(--r-md);background:var(--accent);color:var(--on-accent);border:1px solid var(--accent);cursor:pointer;text-decoration:none;transition:background var(--ease) .18s}
+.btn:hover{filter:brightness(1.06)}
+.btn.ghost{background:transparent;color:var(--fg);border-color:var(--rule)}
+.btn:disabled,.btn[aria-disabled=true]{opacity:.45;cursor:not-allowed}
+.box{border:1px solid var(--rule);border-radius:var(--r-md);background:var(--surface)}
+.tag{display:inline-block;font-family:var(--ui);font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;padding:3px 7px;border:1px solid var(--rule);border-radius:var(--r-sm);color:var(--mute)}
+.field{display:flex;flex-direction:column;gap:6px}
+.field label{font-family:var(--ui);font-size:var(--t-label);font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--mute)}
+.field input,.field select,.field textarea{font:inherit;font-size:16px;min-height:44px;padding:10px 12px;background:var(--bg);color:var(--fg);border:1px solid var(--rule);border-radius:var(--r-md)}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--fg);outline:none}
+table.t{width:100%;border-collapse:collapse;font-size:15px}
+table.t th{font-family:var(--ui);font-size:11px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--mute);text-align:left;padding:10px 12px;border-bottom:1px solid var(--fg)}
+table.t td{padding:12px;border-bottom:1px solid var(--rule);vertical-align:top}
+table.t td.n{text-align:right;font-family:var(--mono)}
+figure.frame{border:1px solid var(--rule);border-radius:var(--r-md);overflow:hidden;background:var(--surface)}
+figure.frame figcaption{font-family:var(--ui);font-size:13px;color:var(--mute);padding:10px 14px;border-top:1px solid var(--rule)}
+
+/* states */
+.state{border:1px dashed var(--rule);border-radius:var(--r-md);padding:var(--s6);text-align:center;color:var(--mute)}
+.state h3{color:var(--fg);font-family:var(--display);font-size:var(--t-h3);margin-bottom:var(--s2)}
+.skel{background:linear-gradient(var(--rule),var(--rule));opacity:.5;border-radius:var(--r-sm);height:14px}
+.notice{border:1px solid var(--rule);border-radius:var(--r-md);padding:12px 16px;font-family:var(--ui);font-size:14px}
+.notice.err{border-color:var(--accent);color:var(--fg)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}

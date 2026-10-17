@@ -12,4 +12,12 @@
   var RONNA_LIVE = false;
   window.RONNA_LIVE = RONNA_LIVE;
   document.documentElement.setAttribute("data-ronna", RONNA_LIVE ? "live" : "soon");
+  // Live-only UI also carries the HTML hidden attribute, so sign-in / upgrade controls stay out of
+  // no-CSS views (crawlers, reader modes) while closed. Launch removes it once the DOM is parsed.
+  if (RONNA_LIVE) {
+    document.addEventListener("DOMContentLoaded", function () {
+      var els = document.querySelectorAll("[data-ronna-live][hidden]");
+      for (var i = 0; i < els.length; i++) els[i].removeAttribute("hidden");
+    });
+  }
 })();
